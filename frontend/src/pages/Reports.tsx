@@ -64,6 +64,7 @@ export const Reports = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [sources, setSources] = useState<Source[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [obligations, setObligations] = useState<Obligation[]>([]);
 
   // Filter States
   const [dateRange, setDateRange] = useState('ALL'); // ALL, THIS_YEAR, THIS_MONTH
@@ -111,6 +112,7 @@ export const Reports = () => {
       setAccounts(accs);
       setSources(sourceRes.data);
       setPartners(partnerRes.data);
+      setObligations(obs);
 
       applyFiltersAndCalculate(txs, accs, obs, dateRange, selectedSource, selectedAccount, selectedPartner, globalSearch);
     } catch (err) {
@@ -448,7 +450,7 @@ export const Reports = () => {
                   <Tooltip 
                      cursor={{fill: 'transparent'}}
                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: '#1e293b', color: '#fff' }}
-                     formatter={(value: any) => formatCurrency(Number(value))}
+                     formatter={(value: string | number | undefined) => formatCurrency(Number(value || 0))}
                   />
                   <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}/>
                   <Bar dataKey="Ingresos" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40} />

@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Partner {
+  id              String           @id @default(uuid()) @db.Uuid
+  name            String
+  document        String           @unique
+  createdAt       DateTime         @default(now()) @map("created_at")
+  sources         Source[]
+  obligations     Obligation[]
+  allocationLines AllocationLine[]
+
+  @@map("partners")
+}
+
+model Account {
+  id               String        @id @default(uuid()) @db.Uuid
+  name             String
+  type             String
+  initialBalance   Decimal       @map("initial_balance") @db.Decimal(12, 2)
+  currentBalance   Decimal       @map("current_balance") @db.Decimal(12, 2)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  transactionsFrom Transaction[] @relation("AccountFrom")
+  transactionsTo   Transaction[] @relation("AccountTo")
+  allocations      Allocation[]
+
+  @@map("accounts")
+}
+
+model Source {
+  id                 String              @id @default(uuid()) @db.Uuid
+  name               String
+  type               String
+  initialBalance     Decimal             @map("initial_balance") @db.Decimal(12, 2)
+  currentBalance     Decimal             @map("current_balance") @db.Decimal(12, 2)
+  partnerId          String              @map("partner_id") @db.Uuid
+  partner            Partner             @relation(fields: [partnerId], references: [id])
+  createdAt          DateTime            @default(now()) @map("created_at")
+  transactionSources TransactionSource[]
+
+  @@map("sources")
+}
+
+model Category {
+  id              String           @id @default(uuid()) @db.Uuid
+  name            String
+  type            String // e.g. INCOME, EXPENSE
+  createdAt       DateTime         @default(now()) @map("created_at")
+  transactions    Transaction[]
+  allocationLines AllocationLine[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id     String   @id @default(uuid()) @db.Uuid
+  date   DateTime @db.Date
+  type   String
+  amount Decimal  @db.Decimal(12, 2)
+
+  accountFromId String?  @map("account_from") @db.Uuid
+  accountFrom   Account? @relation("AccountFrom", fields: [accountFromId], references: [id])
+
+  accountToId String?  @map("account_to") @db.Uuid
+  accountTo   Account? @relation("AccountTo", fields: [accountToId], references: [id])
+
+  categoryId String?   @map("category_id") @db.Uuid
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  allocationId String?     @map("allocation_id") @db.Uuid
+  allocation   Allocation? @relation(fields: [allocationId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  description    String? @db.Text
+  thirdPartyName String? @map("third_party_name")
+  attachmentUrl  String? @map("attachment_url")
+
+  transactionSources TransactionSource[]
+
+  @@map("transactions")
+}
+
+model TransactionSource {
+  id            String      @id @default(uuid()) @db.Uuid
+  transactionId String      @map("transaction_id") @db.Uuid
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  sourceId      String      @map("source_id") @db.Uuid
+  source        Source      @relation(fields: [sourceId], references: [id])
+  amount        Decimal     @db.Decimal(12, 2)
+
+  @@map("transaction_sources")
+}
+
+model Obligation {
+  id              String           @id @default(uuid()) @db.Uuid
+  name            String
+  type            String
+  partnerId       String           @map("partner_id") @db.Uuid
+  partner         Partner          @relation(fields: [partnerId], references: [id])
+  initialAmount   Decimal          @map("initial_amount") @db.Decimal(12, 2)
+  remainingAmount Decimal          @map("remaining_amount") @db.Decimal(12, 2)
+  interestRate    Decimal          @map("interest_rate") @db.Decimal(5, 2)
+  dueDate         DateTime         @map("due_date") @db.Date
+  status          String
+  allocationLines AllocationLine[]
+
+  @@map("obligations")
+}
+
+model Allocation {
+  id              String           @id @default(uuid()) @db.Uuid
+  date            DateTime         @db.Date
+  accountId       String           @map("account_id") @db.Uuid
+  account         Account          @relation(fields: [accountId], references: [id])
+  totalAmount     Decimal          @map("total_amount") @db.Decimal(12, 2)
+  status          String
+  notes           String?          @db.Text
+  transactions    Transaction[]
+  allocationLines AllocationLine[]
+
+  @@map("allocations")
+}
+
+model AllocationLine {
+  id           String     @id @default(uuid()) @db.Uuid
+  allocationId String     @map("allocation_id") @db.Uuid
+  allocation   Allocation @relation(fields: [allocationId], references: [id])
+  lineType     String     @map("line_type")
+  amount       Decimal    @db.Decimal(12, 2)
+
+  targetAccountId String? @map("target_account_id") @db.Uuid
+  // This could conditionally relate to Account but for schema simplicity will omit foreign relation to account if we only need the ID, 
+  // or we can add the relation if needed later. Usually we just link it.
+
+  targetPartnerId String?  @map("target_partner_id") @db.Uuid
+  targetPartner   Partner? @relation(fields: [targetPartnerId], references: [id])
+
+  targetObligationId String?     @map("target_obligation_id") @db.Uuid
+  targetObligation   Obligation? @relation(fields: [targetObligationId], references: [id])
+
+  categoryId String?   @map("category_id") @db.Uuid
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  notes String? @db.Text
+
+  @@map("allocation_lines")
+}

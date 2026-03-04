@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-primary: #260a42;
+  --color-background-light: #f7f6f8;
+  --color-background-dark: #191121;
+  --font-display: "Inter", sans-serif;
+  --breakpoint-xs: 400px;
+}
+
+@layer base {
+  body {
+    @apply font-display antialiased;
+  }
+}
+
+.sidebar-active {
+  background-color: rgba(38, 10, 66, 0.1);
+  border-right: 4px solid #260a42;
+}
+
+.glass-card {
+  @apply bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-2xl;
+}

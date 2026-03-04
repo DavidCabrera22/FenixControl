@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#260a42",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Main Container -->
+<div class="layout-container flex h-full grow">
+<!-- Sidebar -->
+<aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark p-4 gap-6">
+<div class="flex items-center gap-3 px-2">
+<div class="flex size-10 items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-primary dark:text-slate-100 text-lg font-bold leading-tight">FÉNIX</h1>
+<p class="text-slate-500 text-xs font-medium">Control de Cuentas</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary dark:text-primary-foreground dark:bg-primary/20 transition-colors" href="#">
+<span class="material-symbols-outlined">swap_horiz</span>
+<span class="text-sm font-bold">Movimientos</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="text-sm font-medium">Cuentas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Configuración</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="flex flex-1 flex-col overflow-y-auto">
+<!-- Header -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark px-8 py-4">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Sistema FÉNIX</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+<input class="h-10 w-64 rounded-lg border-none bg-slate-100 dark:bg-slate-800 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary" placeholder="Buscar..." type="text"/>
+</div>
+<button class="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-opacity-90 transition-all">
+<span class="material-symbols-outlined text-lg">add</span>
+<span>Nuevo Movimiento</span>
+</button>
+<div class="size-10 rounded-full bg-slate-200 overflow-hidden border border-slate-300 dark:border-slate-700">
+<img class="h-full w-full object-cover" data-alt="Avatar de usuario administrador" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_3Eld51fyV3tVDYxUaxMKR9BJssMpAOHgtfAisDVSUk08Yi6ZnzgqILBLrnW5ByVKsystJ34dROxtYwY_jeAnOYQpBngKL2ttjQ-m_DaGrjWh7N4L2qtM-C6ngK0eteuyWSE1xBD5wm4FZckDqjtKYm3Ut8P7ASDrN_T3oLr01uwIeqEc75aMxyZz2yWp-0DSNKNXva7YpwIGUjxNH-yjKFtHwpy_jXpT3fkx56KCpVCqvLr660vHIVVLS1MF0DKn3iaKbp0OQ29x"/>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-6">
+<!-- Title Section -->
+<div class="flex flex-col gap-1">
+<h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">Movimientos</h1>
+<p class="text-slate-500 dark:text-slate-400">Registro y control de ingresos, gastos, transferencias y pagos</p>
+</div>
+<!-- Quick Search & Filters -->
+<div class="bg-white dark:bg-background-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm space-y-4">
+<div class="flex flex-wrap items-center gap-3">
+<!-- Date Range -->
+<div class="flex-1 min-w-[200px]">
+<label class="block text-xs font-bold text-slate-500 uppercase mb-1">Rango de fechas</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
+<input class="w-full h-10 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-4 text-sm" type="text" value="Oct 01, 2023 - Oct 31, 2023"/>
+</div>
+</div>
+<!-- Type Dropdown -->
+<div class="flex-1 min-w-[150px]">
+<label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo</label>
+<select class="w-full h-10 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-primary">
+<option>Todos los tipos</option>
+<option>Ingreso</option>
+<option>Gasto</option>
+<option>Transferencia</option>
+</select>
+</div>
+<!-- Source Dropdown -->
+<div class="flex-1 min-w-[150px]">
+<label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fuente</label>
+<select class="w-full h-10 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-primary">
+<option>Todas las fuentes</option>
+<option>Software</option>
+<option>Oficina</option>
+</select>
+</div>
+<!-- Account Dropdown -->
+<div class="flex-1 min-w-[150px]">
+<label class="block text-xs font-bold text-slate-500 uppercase mb-1">Cuenta</label>
+<select class="w-full h-10 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-primary">
+<option>Todas las cuentas</option>
+<option>Bancolombia</option>
+<option>Efectivo</option>
+</select>
+</div>
+<!-- Category Dropdown -->
+<div class="flex-1 min-w-[150px]">
+<label class="block text-xs font-bold text-slate-500 uppercase mb-1">Categoría</label>
+<select class="w-full h-10 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-primary">
+<option>Todas las categorías</option>
+<option>Venta</option>
+<option>Contador</option>
+</select>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-end gap-2 pt-5">
+<button class="h-10 px-4 rounded-lg bg-primary text-white text-sm font-bold hover:bg-opacity-90">Filtrar</button>
+<button class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800">Limpiar</button>
+</div>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-white dark:bg-background-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Fecha</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tipo</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Fuente</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Cuenta</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Categoría</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Monto</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">24 Oct 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20">INGRESO</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary dark:text-slate-200">
+<span class="size-1.5 rounded-full bg-primary"></span> Software
+                                        </span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 font-medium">Bancolombia</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">Venta</td>
+<td class="px-6 py-4 text-sm font-bold text-emerald-600 dark:text-emerald-400 text-right">$1.200.000</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Completado</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="flex justify-center gap-2">
+<button class="p-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-1 text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">23 Oct 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-md bg-rose-50 dark:bg-rose-900/30 px-2 py-1 text-xs font-bold text-rose-700 dark:text-rose-400 ring-1 ring-inset ring-rose-600/20">GASTO</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary dark:text-slate-200">
+<span class="size-1.5 rounded-full bg-primary"></span> Oficina
+                                        </span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 font-medium">Bancolombia</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">Contador</td>
+<td class="px-6 py-4 text-sm font-bold text-rose-600 dark:text-rose-400 text-right">$450.000</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Completado</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="flex justify-center gap-2">
+<button class="p-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-1 text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50/50 dark:bg-slate-800/20">
+<p class="text-sm text-slate-500">Mostrando <span class="font-bold">2</span> de <span class="font-bold">24</span> resultados</p>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center size-8 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<button class="flex items-center justify-center size-8 rounded border border-primary bg-primary text-white text-sm font-bold">1</button>
+<button class="flex items-center justify-center size-8 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700">2</button>
+<button class="flex items-center justify-center size-8 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700">3</button>
+<button class="flex items-center justify-center size-8 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

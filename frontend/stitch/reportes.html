@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#260a42",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Sistema FÉNIX - Reportes</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex min-h-screen">
+<!-- Sidebar -->
+<aside class="w-64 bg-white dark:bg-background-dark border-r border-slate-200 dark:border-slate-800 flex flex-col fixed h-full">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary text-white p-1.5 rounded-lg">
+<span class="material-symbols-outlined text-2xl">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-primary dark:text-white text-lg font-bold leading-tight tracking-tight">Sistema FÉNIX</h1>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Administrador</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-sm font-medium">Inicio</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary dark:text-white rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">pie_chart</span>
+<span class="text-sm font-semibold">Reportes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">sync_alt</span>
+<span class="text-sm font-medium">Transacciones</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-medium">Socios</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-sm font-medium">Cuentas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Configuración</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2">
+<img alt="User avatar" class="w-10 h-10 rounded-full border-2 border-primary/20" data-alt="Portrait of an administrator user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBc-svzrQ3QZ2Bo0W289m5FeH9YkI_j2SO-N8JkaunDgmzfyuA3IQZRKjF3zbCsEdL0mKvMr5OKuCZhtKb_1pfC4JntLQQNKKpMaxKdQU0zYL8BeHiEnq5tO8YInoBaDm6SES3Zt2rHR8GnW1PeLKOE-Vgp_4_wC1bNU22OopDylWwU47QutlIVtasAl__WswImFR12aFuO1bLPm3_JcNMlpjtTYl8PtBHCu6imIzopD8RCgJdKLU1dJ00AgcXq5ddYrXavquxbiw6"/>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold truncate">Dante Alighieri</p>
+<p class="text-xs text-slate-500 truncate">Ver perfil</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-lg">logout</span>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 ml-64">
+<!-- Topbar -->
+<header class="h-16 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
+<div class="flex items-center w-96">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+<input class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Buscar reportes o transacciones..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-800 mx-2"></div>
+<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                        Nueva Entrada
+                    </button>
+</div>
+</header>
+<!-- Page Header -->
+<div class="p-8">
+<div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+<div>
+<h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Reportes</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Balance general y análisis por fechas</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">download</span>
+                            Exportar
+                            <span class="material-symbols-outlined text-lg">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">save</span>
+                            Guardar reporte
+                        </button>
+</div>
+</div>
+<!-- Filters Bar -->
+<div class="bg-white dark:bg-background-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-4 mb-8">
+<div class="flex flex-col gap-1.5">
+<span class="text-[10px] font-bold text-slate-400 uppercase px-1">Rango de fechas</span>
+<button class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm font-medium border border-transparent hover:border-slate-200 transition-all">
+<span class="material-symbols-outlined text-slate-500 text-lg">calendar_today</span>
+                            Oct 2023 - Nov 2023
+                            <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="text-[10px] font-bold text-slate-400 uppercase px-1">Fuente</span>
+<button class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm font-medium">
+                            Todas <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="text-[10px] font-bold text-slate-400 uppercase px-1">Cuenta</span>
+<button class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm font-medium">
+                            Todas <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="text-[10px] font-bold text-slate-400 uppercase px-1">Socio</span>
+<button class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm font-medium">
+                            Todos <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+</button>
+</div>
+<div class="ml-auto flex gap-2 self-end">
+<button class="px-4 py-2 text-sm font-bold text-primary dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Limpiar</button>
+<button class="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 shadow-md">Aplicar</button>
+</div>
+</div>
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+<!-- Ingresos -->
+<div class="bg-white dark:bg-background-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 p-2 rounded-lg">arrow_downward</span>
+<span class="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded flex items-center gap-0.5">+12% <span class="material-symbols-outlined text-xs">trending_up</span></span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Ingresos</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">$25,000,000</p>
+</div>
+<!-- Gastos -->
+<div class="bg-white dark:bg-background-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-2 rounded-lg">arrow_upward</span>
+<span class="text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-500/10 px-1.5 py-0.5 rounded flex items-center gap-0.5">+4% <span class="material-symbols-outlined text-xs">trending_up</span></span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Gastos</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">$18,000,000</p>
+</div>
+<!-- Neto -->
+<div class="bg-white dark:bg-background-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm border-l-4 border-l-primary">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-primary bg-primary/5 p-2 rounded-lg">balance</span>
+<span class="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded flex items-center gap-0.5">+8% <span class="material-symbols-outlined text-xs">trending_up</span></span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Neto</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">$7,000,000</p>
+</div>
+<!-- Transferencias -->
+<div class="bg-white dark:bg-background-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-blue-500 bg-blue-50 dark:bg-blue-500/10 p-2 rounded-lg">swap_horiz</span>
+<span class="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded flex items-center gap-0.5">0% <span class="material-symbols-outlined text-xs">drag_handle</span></span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Transferencias</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">$2,000,000</p>
+</div>
+<!-- Saldo Final -->
+<div class="bg-white dark:bg-background-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 p-2 rounded-lg">account_balance</span>
+<span class="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded flex items-center gap-0.5">+1.2% <span class="material-symbols-outlined text-xs">trending_up</span></span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Saldo Final</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">$35.2M</p>
+</div>
+<!-- Deuda Pendiente -->
+<div class="bg-white dark:bg-background-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-amber-500 bg-amber-50 dark:bg-amber-500/10 p-2 rounded-lg">pending_actions</span>
+<span class="text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-500/10 px-1.5 py-0.5 rounded flex items-center gap-0.5">-2% <span class="material-symbols-outlined text-xs">trending_down</span></span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Deuda Pendiente</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">$12.4M</p>
+</div>
+</div>
+<!-- Tabs -->
+<div class="border-b border-slate-200 dark:border-slate-800 mb-6 flex gap-8 overflow-x-auto scrollbar-hide">
+<button class="pb-4 px-1 text-sm font-bold border-b-2 border-primary text-primary dark:text-white whitespace-nowrap">General</button>
+<button class="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Por Fuente</button>
+<button class="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Por Cuentas</button>
+<button class="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Por Socio</button>
+<button class="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Por Categoría</button>
+<button class="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Obligaciones</button>
+</div>
+<!-- Tab Content: General -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Section: Flujo del Período Chart Placeholder -->
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-slate-800 dark:text-white">Flujo del período</h3>
+<div class="flex gap-2">
+<div class="flex items-center gap-1.5 text-xs font-medium text-slate-500"><span class="w-3 h-3 rounded-full bg-primary"></span> Ingresos</div>
+<div class="flex items-center gap-1.5 text-xs font-medium text-slate-500"><span class="w-3 h-3 rounded-full bg-slate-300"></span> Gastos</div>
+</div>
+</div>
+<div class="h-64 w-full bg-slate-50 dark:bg-slate-900/50 rounded-lg flex items-end justify-between px-6 pb-4">
+<!-- Bar Chart Mockup -->
+<div class="w-8 bg-slate-200 dark:bg-slate-800 rounded-t h-[40%]"></div>
+<div class="w-8 bg-primary rounded-t h-[70%]"></div>
+<div class="w-8 bg-slate-200 dark:bg-slate-800 rounded-t h-[30%]"></div>
+<div class="w-8 bg-primary rounded-t h-[85%]"></div>
+<div class="w-8 bg-slate-200 dark:bg-slate-800 rounded-t h-[50%]"></div>
+<div class="w-8 bg-primary rounded-t h-[65%]"></div>
+<div class="w-8 bg-slate-200 dark:bg-slate-800 rounded-t h-[20%]"></div>
+<div class="w-8 bg-primary rounded-t h-[90%]"></div>
+<div class="w-8 bg-slate-200 dark:bg-slate-800 rounded-t h-[45%]"></div>
+<div class="w-8 bg-primary rounded-t h-[75%]"></div>
+</div>
+</div>
+<!-- Top Tables -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Top 5 Ingresos -->
+<div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<h4 class="text-sm font-bold text-slate-800 dark:text-white mb-4 uppercase tracking-wider">Top 5 Ingresos</h4>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-sm py-1 border-b border-slate-50 dark:border-slate-800">
+<span class="font-medium">Inversión Sector A</span>
+<span class="font-bold text-emerald-600">$8.5M</span>
+</div>
+<div class="flex items-center justify-between text-sm py-1 border-b border-slate-50 dark:border-slate-800">
+<span class="font-medium">Servicios Consultoría</span>
+<span class="font-bold text-emerald-600">$4.2M</span>
+</div>
+<div class="flex items-center justify-between text-sm py-1 border-b border-slate-50 dark:border-slate-800">
+<span class="font-medium">Renta de Propiedades</span>
+<span class="font-bold text-emerald-600">$3.8M</span>
+</div>
+<div class="flex items-center justify-between text-sm py-1 border-b border-slate-50 dark:border-slate-800">
+<span class="font-medium">Retorno Dividendos</span>
+<span class="font-bold text-emerald-600">$2.1M</span>
+</div>
+<div class="flex items-center justify-between text-sm py-1">
+<span class="font-medium">Otros ingresos</span>
+<span class="font-bold text-emerald-600">$1.4M</span>
+</div>
+</div>
+</div>
+<!-- Top 5 Gastos -->
+<div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<h4 class="text-sm font-bold text-slate-800 dark:text-white mb-4 uppercase tracking-wider">Top 5 Gastos</h4>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-sm py-1 border-b border-slate-50 dark:border-slate-800">
+<span class="font-medium">Nómina Operativa</span>
+<span class="font-bold text-rose-600">$6.1M</span>
+</div>
+<div class="flex items-center justify-between text-sm py-1 border-b border-slate-50 dark:border-slate-800">
+<span class="font-medium">Mantenimiento</span>
+<span class="font-bold text-rose-600">$3.9M</span>
+</div>
+<div class="flex items-center justify-between text-sm py-1 border-b border-slate-50 dark:border-slate-800">
+<span class="font-medium">Impuestos</span>
+<span class="font-bold text-rose-600">$3.2M</span>
+</div>
+<div class="flex items-center justify-between text-sm py-1 border-b border-slate-50 dark:border-slate-800">
+<span class="font-medium">Publicidad</span>
+<span class="font-bold text-rose-600">$2.5M</span>
+</div>
+<div class="flex items-center justify-between text-sm py-1">
+<span class="font-medium">Logística</span>
+<span class="font-bold text-rose-600">$1.3M</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Side: Saldos Actuales -->
+<div class="space-y-6">
+<div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm h-full">
+<h3 class="text-lg font-bold text-slate-800 dark:text-white mb-6">Saldos Actuales</h3>
+<div class="space-y-5">
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-900 dark:text-white truncate">Caja Principal</p>
+<p class="text-xs text-slate-500">Último mov: Hoy</p>
+</div>
+<p class="text-sm font-black text-slate-900 dark:text-white">$4.2M</p>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-900 dark:text-white truncate">Bancolombia Corp</p>
+<p class="text-xs text-slate-500">Último mov: Ayer</p>
+</div>
+<p class="text-sm font-black text-slate-900 dark:text-white">$15.8M</p>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">credit_card</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-900 dark:text-white truncate">TC Business Amex</p>
+<p class="text-xs text-slate-500">Saldo disponible</p>
+</div>
+<p class="text-sm font-black text-slate-900 dark:text-white">$8.0M</p>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">currency_bitcoin</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-900 dark:text-white truncate">Cold Wallet Assets</p>
+<p class="text-xs text-slate-500">Inversiones Crypto</p>
+</div>
+<p class="text-sm font-black text-slate-900 dark:text-white">$7.2M</p>
+</div>
+</div>
+<div class="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
+<div class="bg-primary/5 dark:bg-primary/20 p-4 rounded-lg">
+<p class="text-xs font-bold text-primary dark:text-primary-light uppercase tracking-widest mb-2">Resumen Total</p>
+<div class="flex justify-between items-baseline">
+<p class="text-3xl font-black text-primary dark:text-white">$35.2M</p>
+<p class="text-xs font-semibold text-emerald-600">+2.4% este mes</p>
+</div>
+</div>
+<button class="w-full mt-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                                    Ver todas las cuentas
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

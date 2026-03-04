@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#260a42",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Sistema FÉNIX - Obligaciones</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">local_fire_department</span>
+</div>
+<div>
+<h1 class="text-primary dark:text-slate-100 font-bold text-lg leading-tight">Sistema FÉNIX</h1>
+<p class="text-xs text-slate-500 dark:text-slate-400">Admin Central</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary text-white rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-sm font-medium">Obligaciones</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-sm font-medium">Reportes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Configuración</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-sm font-medium">Ayuda</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Topbar -->
+<header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Buscar obligaciones, deudores..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-semibold">Usuario Admin</p>
+<p class="text-xs text-slate-500">Perfil de Gestión</p>
+</div>
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="Avatar circular de un usuario sonriente" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHBGmR_i_DYYJDEjFuZIc7vD7MtN6IWrpc2814S5ujvmM3YAkUSRWnc5sYiw-fbixFyKcZyWQ8dOzcGSPNjkrbkbqzqlEeq4KQq_FBOgshBFZF4QS1vvmG8ZKAF7eKxc4tlKDYoQJBVvr5i5RqajmlIGEQeB5iyEvhOM8q06wQzaXdKFMMw-yKIhOoSVJW_5gDN_xQOp4EjjLpUqCJqj4oSo83SGv1_zza0uHbsy9Suv-EfoCPkX9VHjz_7_FGKdIL3-ifwJEppC7h"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-8">
+<!-- Header Section -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+<div>
+<h2 class="text-3xl font-black text-primary dark:text-slate-100 tracking-tight">Obligaciones</h2>
+<p class="text-slate-500 dark:text-slate-400">Control de préstamos, deudas y cuentas pendientes</p>
+</div>
+<button class="bg-primary text-white px-6 py-2.5 rounded-lg font-semibold text-sm flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">add</span>
+                        Nueva Obligación
+                    </button>
+</div>
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Deudas</p>
+<div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+</div>
+<h3 class="text-2xl font-bold tracking-tight text-primary dark:text-slate-100">$12.4M</h3>
+<p class="text-emerald-600 text-xs font-semibold mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                            +2.4% este mes
+                        </p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Vencidas</p>
+<div class="size-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+<span class="material-symbols-outlined">warning</span>
+</div>
+</div>
+<h3 class="text-2xl font-bold tracking-tight text-primary dark:text-slate-100">$2.1M</h3>
+<p class="text-red-600 text-xs font-semibold mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_down</span>
+                            -1.2% vs mes anterior
+                        </p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Pagos del Mes</p>
+<div class="size-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined">payments</span>
+</div>
+</div>
+<h3 class="text-2xl font-bold tracking-tight text-primary dark:text-slate-100">$4.2M</h3>
+<p class="text-emerald-600 text-xs font-semibold mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                            +5.0% vs programado
+                        </p>
+</div>
+</div>
+<!-- Filters -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6 flex flex-wrap gap-4 items-center">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Filtros:</span>
+</div>
+<div class="relative">
+<select class="bg-background-light dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 pl-4 pr-10 appearance-none focus:ring-2 focus:ring-primary/20">
+<option>Tipo: Todos</option>
+<option>Préstamos</option>
+<option>Servicios</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
+</div>
+<div class="relative">
+<select class="bg-background-light dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 pl-4 pr-10 appearance-none focus:ring-2 focus:ring-primary/20">
+<option>Estado: Todos</option>
+<option>Pendiente</option>
+<option>Vencido</option>
+<option>Pagado</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
+</div>
+<div class="relative">
+<select class="bg-background-light dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 pl-4 pr-10 appearance-none focus:ring-2 focus:ring-primary/20">
+<option>Acreedor/Deudor</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
+</div>
+<div class="relative">
+<button class="bg-background-light dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 px-4 flex items-center gap-2 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined text-lg">calendar_month</span>
+                            Rango de fechas
+                        </button>
+</div>
+<div class="ml-auto">
+<button class="text-slate-500 hover:text-primary text-sm font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">filter_alt_off</span>
+                            Limpiar
+                        </button>
+</div>
+</div>
+<!-- Table Content -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nombre</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tipo</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Acreedor/Deudor</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Monto Inicial</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Saldo Pendiente</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Vencimiento</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Estado</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="font-semibold text-primary dark:text-slate-100 text-sm">Préstamo Socio Jorge</div>
+<div class="text-xs text-slate-500">REF-0042-24</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium">Préstamo</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 bg-primary/10 rounded-full flex items-center justify-center text-[10px] font-bold text-primary">JS</div>
+<span class="text-sm">Jorge Sánchez</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right text-sm font-medium">$50,000.00</td>
+<td class="px-6 py-4 text-right text-sm font-bold text-primary dark:text-slate-100">$32,500.00</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">15 Oct 2024</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Pendiente</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-500">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="font-semibold text-primary dark:text-slate-100 text-sm">Proveedor Materiales</div>
+<div class="text-xs text-slate-500">FAC-1928-AB</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium">Compra</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 bg-slate-200 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-600">SM</div>
+<span class="text-sm">Suministros Mexico SA</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right text-sm font-medium">$124,000.00</td>
+<td class="px-6 py-4 text-right text-sm font-bold text-red-600">$124,000.00</td>
+<td class="px-6 py-4 text-sm font-medium text-red-600">01 Sep 2024</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Vencido</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-500">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="font-semibold text-primary dark:text-slate-100 text-sm">Alquiler Oficina</div>
+<div class="text-xs text-slate-500">REN-SEPT-24</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium">Gastos</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 bg-primary/10 rounded-full flex items-center justify-center text-[10px] font-bold text-primary">RE</div>
+<span class="text-sm">Real Estate Corp</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right text-sm font-medium">$12,000.00</td>
+<td class="px-6 py-4 text-right text-sm font-bold text-primary dark:text-slate-100">$0.00</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">05 Sep 2024</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Pagado</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-500">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<span class="text-sm text-slate-500">Mostrando 3 de 42 obligaciones</span>
+<div class="flex items-center gap-2">
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded-lg bg-primary text-white font-medium text-sm px-4">1</button>
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-sm px-4">2</button>
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

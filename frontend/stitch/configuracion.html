@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sistema FÉNIX - Configuración</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#260a42",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col">
+<div class="p-6 flex flex-col gap-1">
+<h1 class="text-primary dark:text-slate-100 text-xl font-black tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+                    Sistema FÉNIX
+                </h1>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Control de Cuentas</p>
+</div>
+<nav class="flex-1 px-4 space-y-1 py-4">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">home</span>
+<span class="text-sm font-medium">Inicio</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">swap_horiz</span>
+<span class="text-sm font-medium">Movimientos</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">pie_chart</span>
+<span class="text-sm font-medium">Repartos</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">account_balance_wallet</span>
+<span class="text-sm font-medium">Obligaciones</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">description</span>
+<span class="text-sm font-medium">Reportes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary dark:text-slate-100 rounded-lg transition-colors font-semibold" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm">Configuración</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">AD</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-xs font-bold truncate">Admin Usuario</p>
+<p class="text-[10px] text-slate-500 truncate">admin@fenix.com</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">logout</span>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-y-auto">
+<header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-10">
+<div class="flex items-center gap-2">
+<span class="text-slate-400 text-sm">Configuración</span>
+<span class="material-symbols-outlined text-sm text-slate-400">chevron_right</span>
+<span class="text-primary font-semibold text-sm">Cuentas</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="pl-10 pr-4 py-1.5 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:ring-primary focus:border-primary w-64" placeholder="Buscar parámetro..." type="text"/>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+</button>
+</div>
+</header>
+<div class="p-8 max-w-6xl w-full mx-auto space-y-8">
+<section>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div>
+<h2 class="text-3xl font-black text-primary dark:text-slate-100 tracking-tight">Configuración</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Crea y administra los parámetros globales del sistema FÉNIX.</p>
+</div>
+</div>
+</section>
+<div class="bg-primary/5 border border-primary/20 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-4 text-primary">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined">info</span>
+</div>
+<div>
+<p class="font-bold text-sm">Recomendación del Sistema</p>
+<p class="text-sm opacity-80">Completa Cuentas, Fuentes y Categorías antes de registrar cualquier movimiento financiero.</p>
+</div>
+</div>
+<button class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-all whitespace-nowrap">
+                        Guía de Inicio
+                    </button>
+</div>
+<div class="border-b border-slate-200 dark:border-slate-800 flex gap-8">
+<button class="pb-4 border-b-2 border-primary text-primary font-bold text-sm px-1">Cuentas</button>
+<button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors font-medium text-sm px-1">Fuentes</button>
+<button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors font-medium text-sm px-1">Categorías</button>
+<button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors font-medium text-sm px-1">Socios</button>
+<button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors font-medium text-sm px-1">Terceros</button>
+<button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors font-medium text-sm px-1">Saldos Iniciales</button>
+</div>
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<div class="space-y-1">
+<h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">Listado de Cuentas</h3>
+<p class="text-sm text-slate-500">Administra tus cuentas bancarias y cajas de efectivo.</p>
+</div>
+<button class="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-lg">add</span>
+                            Nueva Cuenta
+                        </button>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Nombre de la Cuenta</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Tipo</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Saldo Actual</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-center">Estado</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<span class="font-semibold text-slate-800 dark:text-slate-200">Bancolombia</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50">Bancaria</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-mono font-bold text-slate-700 dark:text-slate-300">$ 4.250.000</span>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400">Activa</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="font-semibold text-slate-800 dark:text-slate-200">Caja Principal</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50">Caja</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-mono font-bold text-slate-700 dark:text-slate-300">$ 850.000</span>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400">Activa</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center">
+<span class="material-symbols-outlined">savings</span>
+</div>
+<span class="font-semibold text-slate-800 dark:text-slate-200">Bolsillo Impuestos</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-purple-50 text-purple-700 border border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/50">Bolsillo</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-mono font-bold text-slate-700 dark:text-slate-300">$ 12.400.000</span>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400">Activa</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between border-t border-slate-200 dark:border-slate-800">
+<p class="text-xs text-slate-500">Mostrando 3 de 3 cuentas registradas</p>
+<div class="flex gap-2">
+<button class="px-3 py-1 text-xs border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-400 cursor-not-allowed">Anterior</button>
+<button class="px-3 py-1 text-xs border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-400 cursor-not-allowed">Siguiente</button>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h4 class="font-bold text-sm text-slate-500 uppercase tracking-widest">Fuentes Config</h4>
+<span class="material-symbols-outlined text-primary">source</span>
+</div>
+<p class="text-2xl font-black text-primary dark:text-slate-100">12</p>
+<p class="text-xs text-slate-400 italic">Fuentes de ingreso activas</p>
+<button class="w-full text-center py-2 text-primary font-bold text-sm border-t border-slate-100 dark:border-slate-800 mt-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Gestionar fuentes</button>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h4 class="font-bold text-sm text-slate-500 uppercase tracking-widest">Categorías</h4>
+<span class="material-symbols-outlined text-primary">category</span>
+</div>
+<p class="text-2xl font-black text-primary dark:text-slate-100">45</p>
+<p class="text-xs text-slate-400 italic">Categorías de gasto e ingreso</p>
+<button class="w-full text-center py-2 text-primary font-bold text-sm border-t border-slate-100 dark:border-slate-800 mt-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Gestionar categorías</button>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h4 class="font-bold text-sm text-slate-500 uppercase tracking-widest">Socios</h4>
+<span class="material-symbols-outlined text-primary">groups</span>
+</div>
+<p class="text-2xl font-black text-primary dark:text-slate-100">4</p>
+<p class="text-xs text-slate-400 italic">Socios de capital registrados</p>
+<button class="w-full text-center py-2 text-primary font-bold text-sm border-t border-slate-100 dark:border-slate-800 mt-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Gestionar socios</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

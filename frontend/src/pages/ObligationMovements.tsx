@@ -41,7 +41,7 @@ export const ObligationMovements = () => {
   const fetchMovements = async () => {
     setIsLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/transactions');
+      const res = await axios.get(" /transactions " );
       // Filtramos solo los abonos a obligaciones
       const filtered = res.data.filter((t: Transaction) => t.description?.includes('Abono a obligación'));
       // Orden descendente por fecha

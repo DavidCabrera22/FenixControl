@@ -49,8 +49,8 @@ export const Obligaciones = () => {
     setIsLoading(true);
     try {
       const [obsRes, accsRes] = await Promise.all([
-        axios.get('http://localhost:3000/obligations'),
-        axios.get('http://localhost:3000/accounts')
+        axios.get(" /obligations " ),
+        axios.get(" /accounts " )
       ]);
       setObligations(obsRes.data);
       setAccounts(accsRes.data);
@@ -69,7 +69,7 @@ export const Obligaciones = () => {
     e.stopPropagation();
     if (window.confirm("¿Estás seguro de que quieres eliminar esta obligación? Esta acción no se puede deshacer.")) {
       try {
-        await axios.delete(`http://localhost:3000/obligations/${id}`);
+        await axios.delete(`/obligations/${id}`);
         fetchData();
       } catch (err) {
         console.error("Error deleting obligation:", err);

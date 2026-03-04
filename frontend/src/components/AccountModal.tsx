@@ -43,13 +43,13 @@ export const AccountModal = ({ isOpen, onClose, onSaved, initialData }: AccountM
     try {
       if (initialData) {
         // Edit
-        await axios.patch(`http://localhost:3000/accounts/${initialData.id}`, {
+        await axios.patch(`/accounts/${initialData.id}`, {
           ...formData,
           initialBalance: Number(formData.initialBalance),
         });
       } else {
         // Create (backend creates currentBalance equal to initialBalance)
-        await axios.post('http://localhost:3000/accounts', {
+        await axios.post(" /accounts " , {
           ...formData,
           initialBalance: Number(formData.initialBalance),
           currentBalance: Number(formData.initialBalance),

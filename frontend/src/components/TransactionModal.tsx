@@ -38,8 +38,8 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
 
   useEffect(() => {
     if (isOpen) {
-      axios.get('http://localhost:3000/accounts').then(res => setAccounts(res.data)).catch(console.error);
-      axios.get('http://localhost:3000/categories').then(res => setCategories(res.data)).catch(console.error);
+      axios.get(" /accounts " ).then(res => setAccounts(res.data)).catch(console.error);
+      axios.get(" /categories " ).then(res => setCategories(res.data)).catch(console.error);
     }
     
     if (initialData && isOpen) {
@@ -102,9 +102,9 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       };
 
       if (initialData?.id) {
-         await axios.patch(`http://localhost:3000/transactions/${initialData.id}`, payload);
+         await axios.patch(`/transactions/${initialData.id}`, payload);
       } else {
-         await axios.post('http://localhost:3000/transactions', payload);
+         await axios.post(" /transactions " , payload);
       }
 
       onSaved();

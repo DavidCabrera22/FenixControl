@@ -21,7 +21,7 @@ export const SourceModal = ({ isOpen, onClose, onSaved, initialData }: SourceMod
   useEffect(() => {
     if (isOpen) {
       // Fetch partners for the dropdown
-      axios.get('http://localhost:3000/partners').then(res => setPartners(res.data)).catch(console.error);
+      axios.get(" /partners " ).then(res => setPartners(res.data)).catch(console.error);
 
       if (initialData) {
         setFormData({
@@ -64,10 +64,10 @@ export const SourceModal = ({ isOpen, onClose, onSaved, initialData }: SourceMod
 
       if (initialData) {
         // Edit 
-        await axios.patch(`http://localhost:3000/sources/${initialData.id}`, payload);
+        await axios.patch(`/sources/${initialData.id}`, payload);
       } else {
         // Create 
-        await axios.post('http://localhost:3000/sources', payload);
+        await axios.post(" /sources " , payload);
       }
       onSaved();
       onClose();

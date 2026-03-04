@@ -17,7 +17,7 @@ export const Login = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
+      const response = await axios.post(" /auth/login " , {
         email,
         password
       });

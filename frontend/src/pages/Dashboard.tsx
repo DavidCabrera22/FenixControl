@@ -76,9 +76,9 @@ export const Dashboard = () => {
     try {
       setLoading(true);
       const [txRes, accRes, obRes] = await Promise.all([
-        axios.get('http://localhost:3000/transactions'),
-        axios.get('http://localhost:3000/accounts'),
-        axios.get('http://localhost:3000/obligations')
+        axios.get(" /transactions " ),
+        axios.get(" /accounts " ),
+        axios.get(" /obligations " )
       ]);
       
       const txs: Transaction[] = txRes.data;

@@ -31,7 +31,7 @@ export const ObligationModal = ({ isOpen, onClose, onSaved, initialData }: Oblig
 
   useEffect(() => {
     if (isOpen) {
-      axios.get('http://localhost:3000/partners').then(res => setPartners(res.data)).catch(console.error);
+      axios.get(" /partners " ).then(res => setPartners(res.data)).catch(console.error);
     }
     
     if (initialData && isOpen) {
@@ -88,9 +88,9 @@ export const ObligationModal = ({ isOpen, onClose, onSaved, initialData }: Oblig
       };
 
       if (initialData?.id) {
-         await axios.patch(`http://localhost:3000/obligations/${initialData.id}`, payload);
+         await axios.patch(`/obligations/${initialData.id}`, payload);
       } else {
-         await axios.post('http://localhost:3000/obligations', payload);
+         await axios.post(" /obligations " , payload);
       }
 
       onSaved();

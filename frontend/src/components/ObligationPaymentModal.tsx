@@ -49,13 +49,13 @@ export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obli
         thirdPartyName: ob.partner?.name,
       };
 
-      await axios.post('http://localhost:3000/transactions', transactionPayload);
+      await axios.post(" /transactions " , transactionPayload);
 
       // Update the obligation remaining balance
       const newRemaining = Number(ob.remainingAmount) - paymentAmount;
       const status = newRemaining <= 0 ? 'PAID' : ob.status;
 
-      await axios.patch(`http://localhost:3000/obligations/${ob.id}`, {
+      await axios.patch(`/obligations/${ob.id}`, {
         remainingAmount: newRemaining,
         status: status
       });

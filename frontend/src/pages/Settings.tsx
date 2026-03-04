@@ -92,9 +92,9 @@ export const Settings = () => {
   const fetchStats = async () => {
     try {
       const [srcRes, catRes, partRes] = await Promise.all([
-        axios.get('http://localhost:3000/sources'),
-        axios.get('http://localhost:3000/categories'),
-        axios.get('http://localhost:3000/partners'),
+        axios.get(" /sources " ),
+        axios.get(" /categories " ),
+        axios.get(" /partners " ),
       ]);
       setStats({
         sources: srcRes.data.length,
@@ -109,7 +109,7 @@ export const Settings = () => {
   const fetchAccounts = async () => {
     setIsAccountsLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/accounts');
+      const res = await axios.get(" /accounts " );
       setAccounts(res.data);
     } catch (err) {
       console.error("Error fetching accounts", err);
@@ -121,7 +121,7 @@ export const Settings = () => {
   const handleDeleteAccount = async (id: string) => {
     if (!window.confirm("¿Estás seguro de eliminar esta cuenta? Se perderán las referencias si hay transacciones asociadas.")) return;
     try {
-      await axios.delete(`http://localhost:3000/accounts/${id}`);
+      await axios.delete(`/accounts/${id}`);
       fetchAccounts();
     } catch (err) {
       console.error("Error deleting account", err);
@@ -134,7 +134,7 @@ export const Settings = () => {
     try {
       // Need expanded view to get partner name if available, but backend might just return partnerId
       // For simplicity we just map data
-      const res = await axios.get('http://localhost:3000/sources');
+      const res = await axios.get(" /sources " );
       setSourcesState(res.data);
     } catch (err) {
       console.error("Error fetching sources", err);
@@ -146,7 +146,7 @@ export const Settings = () => {
   const handleDeleteSource = async (id: string) => {
     if (!window.confirm("¿Estás seguro de eliminar esta fuente? Se perderán las referencias si hay transacciones asociadas.")) return;
     try {
-      await axios.delete(`http://localhost:3000/sources/${id}`);
+      await axios.delete(`/sources/${id}`);
       fetchSources();
       fetchStats(); 
     } catch (err) {
@@ -158,7 +158,7 @@ export const Settings = () => {
   const fetchCategories = async () => {
     setIsCategoriesLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/categories');
+      const res = await axios.get(" /categories " );
       setCategories(res.data);
     } catch (err) {
       console.error("Error fetching categories", err);
@@ -170,7 +170,7 @@ export const Settings = () => {
   const handleDeleteCategory = async (id: string) => {
     if (!window.confirm("¿Estás seguro de eliminar esta categoría? Se perderán las referencias si hay transacciones asociadas.")) return;
     try {
-      await axios.delete(`http://localhost:3000/categories/${id}`);
+      await axios.delete(`/categories/${id}`);
       fetchCategories();
       fetchStats(); 
     } catch (err) {
@@ -182,7 +182,7 @@ export const Settings = () => {
   const fetchPartners = async () => {
     setIsPartnersLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/partners');
+      const res = await axios.get(" /partners " );
       setPartnersState(res.data);
     } catch (err) {
       console.error("Error fetching partners", err);
@@ -194,7 +194,7 @@ export const Settings = () => {
   const handleDeletePartner = async (id: string) => {
     if (!window.confirm("¿Estás seguro de eliminar este socio? Se perderán las referencias si hay transacciones o fuentes asociadas.")) return;
     try {
-      await axios.delete(`http://localhost:3000/partners/${id}`);
+      await axios.delete(`/partners/${id}`);
       fetchPartners();
       fetchStats(); 
     } catch (err) {

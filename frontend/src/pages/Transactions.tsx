@@ -46,7 +46,7 @@ export const Transactions = () => {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:3000/transactions');
+      const res = await axios.get(" /transactions " );
       setTransactions(res.data);
     } catch (err) {
       console.error("Error fetching transactions", err);
@@ -100,7 +100,7 @@ export const Transactions = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de que deseas eliminar este movimiento?")) {
       try {
-        await axios.delete(`http://localhost:3000/transactions/${id}`);
+        await axios.delete(`/transactions/${id}`);
         fetchTransactions();
       } catch (err) {
         console.error("Error al eliminar el movimiento", err);

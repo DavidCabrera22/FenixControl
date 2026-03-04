@@ -38,7 +38,7 @@ export const Allocations = () => {
   const fetchAllocations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/allocations');
+      const response = await axios.get(" /allocations " );
       setAllocations(response.data);
     } catch (error) {
       console.error('Error fetching allocations:', error);
@@ -54,7 +54,7 @@ export const Allocations = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de que deseas eliminar este reparto?")) {
       try {
-        await axios.delete(`http://localhost:3000/allocations/${id}`);
+        await axios.delete(`/allocations/${id}`);
         fetchAllocations();
       } catch (err) {
         console.error("Error al eliminar el reparto", err);

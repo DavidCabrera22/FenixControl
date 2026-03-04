@@ -40,10 +40,10 @@ export const CategoryModal = ({ isOpen, onClose, onSaved, initialData }: Categor
     try {
       if (initialData) {
         // Edit 
-        await axios.patch(`http://localhost:3000/categories/${initialData.id}`, formData);
+        await axios.patch(`/categories/${initialData.id}`, formData);
       } else {
         // Create 
-        await axios.post('http://localhost:3000/categories', formData);
+        await axios.post(" /categories " , formData);
       }
       onSaved();
       onClose();

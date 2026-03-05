@@ -51,7 +51,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setCategory(initialData.categoryId || '');
       setThirdPartyName(initialData.thirdPartyName || '');
       setDescription(initialData.description || '');
-      setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/'');
+      setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/').pop() : '');
     } else if (!initialData && isOpen) {
       // Reset logic
       setDate(new Date().toISOString().split('T')[0]);

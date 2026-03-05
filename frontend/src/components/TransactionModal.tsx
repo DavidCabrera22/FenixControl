@@ -38,8 +38,8 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
 
   useEffect(() => {
     if (isOpen) {
-      axios.get(" /accounts " ).then(res => setAccounts(res.data)).catch(console.error);
-      axios.get(" /categories " ).then(res => setCategories(res.data)).catch(console.error);
+      axios.get("/accounts").then(res => setAccounts(res.data)).catch(console.error);
+      axios.get("/categories").then(res => setCategories(res.data)).catch(console.error);
     }
     
     if (initialData && isOpen) {
@@ -51,7 +51,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setCategory(initialData.categoryId || '');
       setThirdPartyName(initialData.thirdPartyName || '');
       setDescription(initialData.description || '');
-      setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/').pop() : '');
+      setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/'');
     } else if (!initialData && isOpen) {
       // Reset logic
       setDate(new Date().toISOString().split('T')[0]);
@@ -104,7 +104,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       if (initialData?.id) {
          await axios.patch(`/transactions/${initialData.id}`, payload);
       } else {
-         await axios.post(" /transactions " , payload);
+         await axios.post("/transactions" , payload);
       }
 
       onSaved();

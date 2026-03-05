@@ -27,7 +27,7 @@ export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: Alloc
 
   useEffect(() => {
     if (isOpen) {
-      axios.get(" /accounts " ).then(res => setAccounts(res.data)).catch(console.error);
+      axios.get("/accounts").then(res => setAccounts(res.data)).catch(console.error);
     }
     
     if (initialData && isOpen) {
@@ -72,7 +72,7 @@ export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: Alloc
       if (initialData?.id) {
          await axios.patch(`/allocations/${initialData.id}`, payload);
       } else {
-         await axios.post(" /allocations " , payload);
+         await axios.post("/allocations" , payload);
       }
 
       onSaved();

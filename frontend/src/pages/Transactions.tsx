@@ -46,7 +46,7 @@ export const Transactions = () => {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(" /transactions " );
+      const res = await axios.get("/transactions");
       setTransactions(res.data);
     } catch (err) {
       console.error("Error fetching transactions", err);

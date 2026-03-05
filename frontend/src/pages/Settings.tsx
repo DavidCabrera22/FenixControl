@@ -92,9 +92,9 @@ export const Settings = () => {
   const fetchStats = async () => {
     try {
       const [srcRes, catRes, partRes] = await Promise.all([
-        axios.get(" /sources " ),
-        axios.get(" /categories " ),
-        axios.get(" /partners " ),
+        axios.get("/sources"),
+        axios.get("/categories"),
+        axios.get("/partners"),
       ]);
       setStats({
         sources: srcRes.data.length,
@@ -109,7 +109,7 @@ export const Settings = () => {
   const fetchAccounts = async () => {
     setIsAccountsLoading(true);
     try {
-      const res = await axios.get(" /accounts " );
+      const res = await axios.get("/accounts");
       setAccounts(res.data);
     } catch (err) {
       console.error("Error fetching accounts", err);
@@ -134,7 +134,7 @@ export const Settings = () => {
     try {
       // Need expanded view to get partner name if available, but backend might just return partnerId
       // For simplicity we just map data
-      const res = await axios.get(" /sources " );
+      const res = await axios.get("/sources");
       setSourcesState(res.data);
     } catch (err) {
       console.error("Error fetching sources", err);
@@ -158,7 +158,7 @@ export const Settings = () => {
   const fetchCategories = async () => {
     setIsCategoriesLoading(true);
     try {
-      const res = await axios.get(" /categories " );
+      const res = await axios.get("/categories");
       setCategories(res.data);
     } catch (err) {
       console.error("Error fetching categories", err);
@@ -182,7 +182,7 @@ export const Settings = () => {
   const fetchPartners = async () => {
     setIsPartnersLoading(true);
     try {
-      const res = await axios.get(" /partners " );
+      const res = await axios.get("/partners");
       setPartnersState(res.data);
     } catch (err) {
       console.error("Error fetching partners", err);

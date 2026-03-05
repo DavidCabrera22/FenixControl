@@ -97,11 +97,11 @@ export const Reports = () => {
     setIsLoading(true);
     try {
       const [txRes, accRes, obRes, sourceRes, partnerRes] = await Promise.all([
-        axios.get(" /transactions " ),
-        axios.get(" /accounts " ),
-        axios.get(" /obligations " ),
-        axios.get(" /sources " ),
-        axios.get(" /partners " )
+        axios.get("/transactions"),
+        axios.get("/accounts"),
+        axios.get("/obligations"),
+        axios.get("/sources"),
+        axios.get("/partners")
       ]);
 
       const txs: Transaction[] = txRes.data;

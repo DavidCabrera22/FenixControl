@@ -43,7 +43,7 @@ export const PartnerModal = ({ isOpen, onClose, onSaved, initialData }: PartnerM
         await axios.patch(`/partners/${initialData.id}`, formData);
       } else {
         // Create 
-        await axios.post(" /partners " , formData);
+        await axios.post("/partners" , formData);
       }
       onSaved();
       onClose();

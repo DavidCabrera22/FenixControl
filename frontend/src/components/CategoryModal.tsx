@@ -43,7 +43,7 @@ export const CategoryModal = ({ isOpen, onClose, onSaved, initialData }: Categor
         await axios.patch(`/categories/${initialData.id}`, formData);
       } else {
         // Create 
-        await axios.post(" /categories " , formData);
+        await axios.post("/categories" , formData);
       }
       onSaved();
       onClose();

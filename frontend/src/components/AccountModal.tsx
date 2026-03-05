@@ -49,7 +49,7 @@ export const AccountModal = ({ isOpen, onClose, onSaved, initialData }: AccountM
         });
       } else {
         // Create (backend creates currentBalance equal to initialBalance)
-        await axios.post(" /accounts " , {
+        await axios.post("/accounts" , {
           ...formData,
           initialBalance: Number(formData.initialBalance),
           currentBalance: Number(formData.initialBalance),

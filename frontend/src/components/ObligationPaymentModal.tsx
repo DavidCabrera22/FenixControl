@@ -49,7 +49,7 @@ export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obli
         thirdPartyName: ob.partner?.name,
       };
 
-      await axios.post(" /transactions " , transactionPayload);
+      await axios.post("/transactions" , transactionPayload);
 
       // Update the obligation remaining balance
       const newRemaining = Number(ob.remainingAmount) - paymentAmount;

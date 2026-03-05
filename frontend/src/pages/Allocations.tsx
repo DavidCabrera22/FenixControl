@@ -38,7 +38,7 @@ export const Allocations = () => {
   const fetchAllocations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(" /allocations " );
+      const response = await axios.get("/allocations");
       setAllocations(response.data);
     } catch (error) {
       console.error('Error fetching allocations:', error);

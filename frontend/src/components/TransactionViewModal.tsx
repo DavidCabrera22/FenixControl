@@ -97,7 +97,7 @@ export const TransactionViewModal = ({ transaction, isOpen, onClose }: Transacti
                     <span className="material-symbols-outlined text-xl block">image</span>
                   </div>
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-300 truncate max-w-[200px]">
-                    {transaction.attachmentUrl.split('/').pop() || 'Archivo adjunto'}
+                    {transaction.attachmentUrl.split('/'Archivo adjunto'}
                   </span>
                 </div>
                 <span className="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">download</span>

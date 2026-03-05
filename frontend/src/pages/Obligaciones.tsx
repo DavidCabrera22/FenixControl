@@ -49,8 +49,8 @@ export const Obligaciones = () => {
     setIsLoading(true);
     try {
       const [obsRes, accsRes] = await Promise.all([
-        axios.get(" /obligations " ),
-        axios.get(" /accounts " )
+        axios.get("/obligations"),
+        axios.get("/accounts")
       ]);
       setObligations(obsRes.data);
       setAccounts(accsRes.data);

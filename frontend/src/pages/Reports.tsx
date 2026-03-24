@@ -61,12 +61,7 @@ interface Obligation {
   partner?: { name: string };
 }
 
-// Extends Transaction to include common relations from backend
-interface PopulatedTransaction extends Transaction {
-  accountFromId?: string;
-  accountToId?: string;
-  transactionSources?: { sourceId: string; amount: string | number; source?: { partnerId?: string } }[];
-}
+type PopulatedTransaction = Transaction;
 
 export const Reports = () => {
   const { globalSearch } = useOutletContext<{ globalSearch: string }>();

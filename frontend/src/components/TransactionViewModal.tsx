@@ -8,7 +8,6 @@ interface Transaction {
   description?: string;
   thirdPartyName?: string;
   date: string;
-  status: string;
   createdAt: string;
   category?: { name: string };
   accountFrom?: { name: string };

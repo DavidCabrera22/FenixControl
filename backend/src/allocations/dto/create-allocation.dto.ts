@@ -1,5 +1,6 @@
 ﻿import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsDateString,
   IsNotEmpty,
   IsNumber,
@@ -7,8 +8,10 @@ import {
   IsString,
   IsUUID,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { CreateAllocationLineDto } from './create-allocation-line.dto';
 
 export class CreateAllocationDto {
   @ApiProperty({
@@ -48,4 +51,15 @@ export class CreateAllocationDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiProperty({
+    type: [CreateAllocationLineDto],
+    description: 'Optional allocation lines to create along with the allocation',
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateAllocationLineDto)
+  lines?: CreateAllocationLineDto[];
 }

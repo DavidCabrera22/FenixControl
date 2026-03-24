@@ -6,17 +6,15 @@ import { clsx } from 'clsx';
 // Type definitions based on the backend schema
 interface Transaction {
   id: string;
-  sourceId: string;
   categoryId: string;
-  type: 'INCOME' | 'EXPENSE' | 'ALLOCATION' | 'LOAN';
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
   amount: number;
   description: string;
   date: string;
-  status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
   createdAt: string;
   category?: { name: string };
-  categoryRel?: { name: string, color: string };
-  sourceRel?: { name: string };
+  accountFrom?: { name: string };
+  accountTo?: { name: string };
 }
 
 interface Account {
@@ -224,49 +222,36 @@ export const Dashboard = () => {
                       <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Tipo</th>
                       <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Descripción</th>
                       <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Monto</th>
-                      <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {transactions.length === 0 ? (
-                      <tr><td colSpan={5} className="p-6 text-center text-slate-500">No hay movimientos recientes</td></tr>
+                      <tr><td colSpan={4} className="p-6 text-center text-slate-500">No hay movimientos recientes</td></tr>
                     ) : (
                       transactions.map(tx => (
                         <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
                           <td className="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                            {new Date(tx.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            {new Date(tx.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })}
                           </td>
                           <td className="px-4 md:px-6 py-3 md:py-4">
                             <span className={clsx(
                               "px-2 py-1 text-[9px] md:text-[10px] font-black rounded uppercase",
                               tx.type === 'INCOME' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
                               tx.type === 'EXPENSE' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400' :
-                              tx.type === 'ALLOCATION' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' :
+                              tx.type === 'TRANSFER' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' :
                               'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
                             )}>
-                              {tx.type === 'INCOME' ? 'Ingreso' : tx.type === 'EXPENSE' ? 'Gasto' : tx.type === 'ALLOCATION' ? 'Reparto' : 'Préstamo'}
+                              {tx.type === 'INCOME' ? 'Ingreso' : tx.type === 'EXPENSE' ? 'Gasto' : 'Transferencia'}
                             </span>
                           </td>
                           <td className="px-4 md:px-6 py-3 md:py-4">
                             <span className="font-semibold text-xs md:text-sm text-slate-900 dark:text-slate-100 line-clamp-1">{tx.category?.name || 'Movimiento'}</span>
                           </td>
                           <td className={clsx("px-4 md:px-6 py-3 md:py-4 text-right font-bold text-xs md:text-base whitespace-nowrap",
-                            tx.type === 'INCOME' ? 'text-emerald-600 dark:text-emerald-400' : 
+                            tx.type === 'INCOME' ? 'text-emerald-600 dark:text-emerald-400' :
                             tx.type === 'EXPENSE' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
                           )}>
                             {tx.type === 'EXPENSE' ? '-' : ''}{formatCurrency(tx.amount)}
-                          </td>
-                          <td className="px-4 md:px-6 py-3 md:py-4">
-                            <div className={clsx("flex items-center gap-1.5 text-[10px] md:text-xs font-bold",
-                              tx.status === 'COMPLETED' ? 'text-emerald-600 dark:text-emerald-400' :
-                              tx.status === 'PENDING' ? 'text-amber-500' : 'text-slate-400'
-                            )}>
-                              <span className={clsx("size-1.5 md:size-2 rounded-full",
-                                tx.status === 'COMPLETED' ? 'bg-emerald-600 dark:bg-emerald-400' :
-                                tx.status === 'PENDING' ? 'bg-amber-500 animate-pulse' : 'bg-slate-400'
-                              )}></span> 
-                              {tx.status === 'COMPLETED' ? 'Completado' : tx.status === 'PENDING' ? 'Procesando' : 'Cancelado'}
-                            </div>
                           </td>
                         </tr>
                       ))

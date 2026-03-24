@@ -6,13 +6,17 @@
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AllocationsService } from './allocations.service';
 import { CreateAllocationDto } from './dto/create-allocation.dto';
 import { UpdateAllocationDto } from './dto/update-allocation.dto';
+import { CreateAllocationLineDto } from './dto/create-allocation-line.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Allocations')
+@UseGuards(JwtAuthGuard)
 @Controller('allocations')
 export class AllocationsController {
   constructor(private readonly allocationsService: AllocationsService) {}
@@ -52,6 +56,25 @@ export class AllocationsController {
     @Body() updateAllocationDto: UpdateAllocationDto,
   ) {
     return this.allocationsService.update(id, updateAllocationDto);
+  }
+
+  @Post(':id/lines')
+  @ApiOperation({ summary: 'Agregar una línea a un reparto existente' })
+  @ApiResponse({ status: 201, description: 'Línea creada.' })
+  @ApiResponse({ status: 404, description: 'Reparto no encontrado.' })
+  addLine(
+    @Param('id') id: string,
+    @Body() createLineDto: CreateAllocationLineDto,
+  ) {
+    return this.allocationsService.addLine(id, createLineDto);
+  }
+
+  @Delete(':id/lines/:lineId')
+  @ApiOperation({ summary: 'Eliminar una línea de un reparto' })
+  @ApiResponse({ status: 200, description: 'Línea eliminada.' })
+  @ApiResponse({ status: 404, description: 'Línea no encontrada.' })
+  removeLine(@Param('id') id: string, @Param('lineId') lineId: string) {
+    return this.allocationsService.removeLine(id, lineId);
   }
 
   @Delete(':id')

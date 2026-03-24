@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
+import { clsx } from 'clsx';
 import { formatCurrency } from '../lib/utils';
 import {
   BarChart,
@@ -21,6 +22,12 @@ interface Transaction {
   amount: string | number;
   description?: string;
   date: string;
+  accountFromId?: string;
+  accountToId?: string;
+  accountFrom?: { id: string; name: string };
+  accountTo?: { id: string; name: string };
+  category?: { id: string; name: string };
+  transactionSources?: { sourceId: string; amount: string | number; source?: { id: string; name: string; partnerId: string } }[];
 }
 
 interface Account {
@@ -44,16 +51,21 @@ interface Partner {
 
 interface Obligation {
   id: string;
+  name: string;
+  type: string;
+  initialAmount: string | number;
   remainingAmount: string | number;
+  interestRate: string | number;
+  dueDate: string;
+  status: string;
+  partner?: { name: string };
 }
 
 // Extends Transaction to include common relations from backend
 interface PopulatedTransaction extends Transaction {
-  transactionSources?: { sourceId: string, amount: string | number }[];
-  accountId?: string;
-  partnerId?: string;
-  fromAccountId?: string;
-  toAccountId?: string;
+  accountFromId?: string;
+  accountToId?: string;
+  transactionSources?: { sourceId: string; amount: string | number; source?: { partnerId?: string } }[];
 }
 
 export const Reports = () => {
@@ -67,11 +79,17 @@ export const Reports = () => {
   const [obligations, setObligations] = useState<Obligation[]>([]);
 
   // Filter States
-  const [dateRange, setDateRange] = useState('ALL'); // ALL, THIS_YEAR, THIS_MONTH
+  const [dateRange, setDateRange] = useState('ALL');
   const [selectedSource, setSelectedSource] = useState('ALL');
   const [selectedAccount, setSelectedAccount] = useState('ALL');
   const [selectedPartner, setSelectedPartner] = useState('ALL');
-  
+
+  // Active tab
+  const [activeTab, setActiveTab] = useState('general');
+
+  // Filtered transactions (shared across tabs)
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+
   const reportRef = useRef<HTMLDivElement>(null);
 
   // KPIs
@@ -161,11 +179,15 @@ export const Reports = () => {
     }
     
     if (accountFilter !== 'ALL') {
-       filteredTxs = filteredTxs.filter(t => t.accountId === accountFilter || t.fromAccountId === accountFilter || t.toAccountId === accountFilter);
+      filteredTxs = filteredTxs.filter(t =>
+        t.accountFromId === accountFilter || t.accountToId === accountFilter
+      );
     }
-    
+
     if (partnerFilter !== 'ALL') {
-       filteredTxs = filteredTxs.filter(t => t.partnerId === partnerFilter);
+      filteredTxs = filteredTxs.filter(t =>
+        t.transactionSources?.some(ts => ts.source?.partnerId === partnerFilter)
+      );
     }
     
     // Global Search
@@ -201,6 +223,7 @@ export const Reports = () => {
     const saldoFinal = accs.reduce((acc, curr) => acc + Number(curr.currentBalance), 0);
     const deudaPendiente = obs.reduce((acc, curr) => acc + Number(curr.remainingAmount), 0);
 
+    setFilteredTransactions(filteredTxs);
     setKpis({
       ingresos,
       gastos,
@@ -418,16 +441,31 @@ export const Reports = () => {
 
       {/* Tabs */}
       <div className="border-b border-slate-200 dark:border-slate-800 mb-6 flex gap-8 overflow-x-auto scrollbar-hide">
-        <button className="pb-4 px-1 text-sm font-bold border-b-2 border-primary text-primary dark:text-white whitespace-nowrap">General</button>
-        <button className="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Por Fuente</button>
-        <button className="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Por Cuentas</button>
-        <button className="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Por Socio</button>
-        <button className="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Por Categoría</button>
-        <button className="pb-4 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 whitespace-nowrap">Obligaciones</button>
+        {[
+          { id: 'general', label: 'General' },
+          { id: 'fuente', label: 'Por Fuente' },
+          { id: 'cuentas', label: 'Por Cuentas' },
+          { id: 'socio', label: 'Por Socio' },
+          { id: 'categoria', label: 'Por Categoría' },
+          { id: 'obligaciones', label: 'Obligaciones' },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={clsx(
+              "pb-4 px-1 text-sm font-medium border-b-2 whitespace-nowrap transition-colors",
+              activeTab === tab.id
+                ? "border-primary text-primary dark:text-white font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Tab Content: General */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {activeTab === 'general' && <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Middle Column (Chart and Tables) */}
         <div className="lg:col-span-2 space-y-6">
@@ -532,7 +570,228 @@ export const Reports = () => {
           </div>
         </div>
 
-      </div>
+      </div>}
+
+      {/* Tab Content: Por Fuente */}
+      {activeTab === 'fuente' && (() => {
+        const bySource: Record<string, { name: string; income: number; expense: number }> = {};
+        filteredTransactions.forEach(t => {
+          t.transactionSources?.forEach(ts => {
+            const name = ts.source?.name ?? 'Sin fuente';
+            if (!bySource[name]) bySource[name] = { name, income: 0, expense: 0 };
+            if (t.type === 'INCOME') bySource[name].income += Number(ts.amount);
+            else if (t.type === 'EXPENSE') bySource[name].expense += Number(ts.amount);
+          });
+        });
+        const rows = Object.values(bySource).sort((a, b) => (b.income + b.expense) - (a.income + a.expense));
+        return (
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-slate-900 dark:text-white">Movimientos por Fuente</h3>
+            </div>
+            <table className="w-full text-left">
+              <thead><tr className="bg-slate-50 dark:bg-slate-800/50">
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Fuente</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Ingresos</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Gastos</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Neto</th>
+              </tr></thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {rows.length === 0 ? <tr><td colSpan={4} className="px-6 py-8 text-center text-slate-500">Sin datos para el filtro seleccionado</td></tr> : rows.map(r => (
+                  <tr key={r.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                    <td className="px-6 py-3 text-sm font-medium text-slate-800 dark:text-slate-200">{r.name}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-emerald-600 text-right">{formatCurrency(r.income)}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-rose-600 text-right">{formatCurrency(r.expense)}</td>
+                    <td className={clsx("px-6 py-3 text-sm font-black text-right", r.income - r.expense >= 0 ? 'text-emerald-600' : 'text-rose-600')}>{formatCurrency(r.income - r.expense)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
+
+      {/* Tab Content: Por Cuentas */}
+      {activeTab === 'cuentas' && (() => {
+        const byAccount: Record<string, { name: string; income: number; expense: number; balance: number }> = {};
+        accounts.forEach(a => { byAccount[a.id] = { name: a.name, income: 0, expense: 0, balance: Number(a.currentBalance) }; });
+        filteredTransactions.forEach(t => {
+          if (t.type === 'INCOME' && t.accountToId && byAccount[t.accountToId]) byAccount[t.accountToId].income += Number(t.amount);
+          if (t.type === 'EXPENSE' && t.accountFromId && byAccount[t.accountFromId]) byAccount[t.accountFromId].expense += Number(t.amount);
+          if (t.type === 'TRANSFER') {
+            if (t.accountFromId && byAccount[t.accountFromId]) byAccount[t.accountFromId].expense += Number(t.amount);
+            if (t.accountToId && byAccount[t.accountToId]) byAccount[t.accountToId].income += Number(t.amount);
+          }
+        });
+        const rows = Object.values(byAccount);
+        return (
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-slate-900 dark:text-white">Movimientos por Cuenta</h3>
+            </div>
+            <table className="w-full text-left">
+              <thead><tr className="bg-slate-50 dark:bg-slate-800/50">
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Cuenta</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Ingresos</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Gastos</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Saldo Actual</th>
+              </tr></thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {rows.map(r => (
+                  <tr key={r.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                    <td className="px-6 py-3 text-sm font-medium text-slate-800 dark:text-slate-200">{r.name}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-emerald-600 text-right">{formatCurrency(r.income)}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-rose-600 text-right">{formatCurrency(r.expense)}</td>
+                    <td className="px-6 py-3 text-sm font-black text-slate-900 dark:text-white text-right">{formatCurrency(r.balance)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
+
+      {/* Tab Content: Por Socio */}
+      {activeTab === 'socio' && (() => {
+        const byPartner: Record<string, { name: string; income: number; expense: number }> = {};
+        partners.forEach(p => { byPartner[p.id] = { name: p.name, income: 0, expense: 0 }; });
+        filteredTransactions.forEach(t => {
+          t.transactionSources?.forEach(ts => {
+            const pid = ts.source?.partnerId;
+            if (pid && byPartner[pid]) {
+              if (t.type === 'INCOME') byPartner[pid].income += Number(ts.amount);
+              else if (t.type === 'EXPENSE') byPartner[pid].expense += Number(ts.amount);
+            }
+          });
+        });
+        const rows = Object.values(byPartner).filter(r => r.income > 0 || r.expense > 0);
+        return (
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-slate-900 dark:text-white">Movimientos por Socio</h3>
+            </div>
+            <table className="w-full text-left">
+              <thead><tr className="bg-slate-50 dark:bg-slate-800/50">
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Socio</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Ingresos</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Gastos</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Neto</th>
+              </tr></thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {rows.length === 0 ? <tr><td colSpan={4} className="px-6 py-8 text-center text-slate-500">Sin datos para el filtro seleccionado</td></tr> : rows.map(r => (
+                  <tr key={r.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                    <td className="px-6 py-3 text-sm font-medium text-slate-800 dark:text-slate-200">{r.name}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-emerald-600 text-right">{formatCurrency(r.income)}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-rose-600 text-right">{formatCurrency(r.expense)}</td>
+                    <td className={clsx("px-6 py-3 text-sm font-black text-right", r.income - r.expense >= 0 ? 'text-emerald-600' : 'text-rose-600')}>{formatCurrency(r.income - r.expense)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
+
+      {/* Tab Content: Por Categoría */}
+      {activeTab === 'categoria' && (() => {
+        const byCat: Record<string, { name: string; count: number; income: number; expense: number }> = {};
+        filteredTransactions.forEach(t => {
+          const name = t.category?.name ?? 'Sin categoría';
+          if (!byCat[name]) byCat[name] = { name, count: 0, income: 0, expense: 0 };
+          byCat[name].count++;
+          if (t.type === 'INCOME') byCat[name].income += Number(t.amount);
+          else if (t.type === 'EXPENSE') byCat[name].expense += Number(t.amount);
+        });
+        const rows = Object.values(byCat).sort((a, b) => (b.income + b.expense) - (a.income + a.expense));
+        return (
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-slate-900 dark:text-white">Movimientos por Categoría</h3>
+            </div>
+            <table className="w-full text-left">
+              <thead><tr className="bg-slate-50 dark:bg-slate-800/50">
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Categoría</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Movimientos</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Ingresos</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Gastos</th>
+              </tr></thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {rows.length === 0 ? <tr><td colSpan={4} className="px-6 py-8 text-center text-slate-500">Sin datos para el filtro seleccionado</td></tr> : rows.map(r => (
+                  <tr key={r.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                    <td className="px-6 py-3 text-sm font-medium text-slate-800 dark:text-slate-200">{r.name}</td>
+                    <td className="px-6 py-3 text-sm text-slate-500 text-right">{r.count}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-emerald-600 text-right">{formatCurrency(r.income)}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-rose-600 text-right">{formatCurrency(r.expense)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
+
+      {/* Tab Content: Obligaciones */}
+      {activeTab === 'obligaciones' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-5 py-4 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Deuda Total</p>
+                <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{formatCurrency(obligations.reduce((s, o) => s + Number(o.initialAmount), 0))}</p>
+              </div>
+              <span className="material-symbols-outlined text-2xl text-slate-400">savings</span>
+            </div>
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-5 py-4 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Saldo Pendiente</p>
+                <p className="text-xl font-black text-amber-600 mt-0.5">{formatCurrency(obligations.reduce((s, o) => s + Number(o.remainingAmount), 0))}</p>
+              </div>
+              <span className="material-symbols-outlined text-2xl text-amber-400">pending_actions</span>
+            </div>
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-5 py-4 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pagado</p>
+                <p className="text-xl font-black text-emerald-600 mt-0.5">{formatCurrency(obligations.reduce((s, o) => s + (Number(o.initialAmount) - Number(o.remainingAmount)), 0))}</p>
+              </div>
+              <span className="material-symbols-outlined text-2xl text-emerald-500">check_circle</span>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-slate-900 dark:text-white">Detalle de Obligaciones</h3>
+            </div>
+            <table className="w-full text-left">
+              <thead><tr className="bg-slate-50 dark:bg-slate-800/50">
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Nombre</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Socio</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Inicial</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Pendiente</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Vencimiento</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Estado</th>
+              </tr></thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {obligations.length === 0 ? (
+                  <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">No hay obligaciones registradas</td></tr>
+                ) : obligations.map(o => (
+                  <tr key={o.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                    <td className="px-6 py-3 text-sm font-medium text-slate-800 dark:text-slate-200">{o.name}</td>
+                    <td className="px-6 py-3 text-sm text-slate-500">{o.partner?.name ?? '—'}</td>
+                    <td className="px-6 py-3 text-sm text-right text-slate-600 dark:text-slate-400">{formatCurrency(Number(o.initialAmount))}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-amber-600 text-right">{formatCurrency(Number(o.remainingAmount))}</td>
+                    <td className="px-6 py-3 text-sm text-right text-slate-500">{new Date(o.dueDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })}</td>
+                    <td className="px-6 py-3">
+                      <span className={clsx("px-2 py-0.5 rounded-full text-xs font-bold",
+                        o.status === 'PAID' ? 'bg-emerald-100 text-emerald-700' :
+                        o.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'
+                      )}>{o.status === 'PAID' ? 'Pagado' : o.status === 'PENDING' ? 'Pendiente' : o.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

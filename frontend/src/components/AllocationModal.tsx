@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { SearchableSelect } from './SearchableSelect';
+import { formatCurrency } from '../lib/utils';
+import { CurrencyInput } from './CurrencyInput';
 
 interface AllocationModalProps {
   isOpen: boolean;
@@ -12,6 +14,7 @@ interface AllocationModalProps {
 interface Account {
   id: string;
   name: string;
+  currentBalance: number;
 }
 
 export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: AllocationModalProps) => {
@@ -24,6 +27,7 @@ export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: Alloc
   const [status, setStatus] = useState('OPEN');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [remainingBalance, setRemainingBalance] = useState<number | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -37,13 +41,13 @@ export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: Alloc
       setStatus(initialData.status || 'OPEN');
       setNotes(initialData.notes || '');
     } else if (!initialData && isOpen) {
-      // Reset logic
       setDate(new Date().toISOString().split('T')[0]);
       setAccountId('');
       setTotalAmount('');
       setStatus('OPEN');
       setNotes('');
     }
+    if (!isOpen) setRemainingBalance(null);
   }, [isOpen, initialData]);
 
   if (!isOpen) return null;
@@ -70,13 +74,22 @@ export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: Alloc
       };
 
       if (initialData?.id) {
-         await axios.patch(`/allocations/${initialData.id}`, payload);
+        await axios.patch(`/allocations/${initialData.id}`, payload);
+        onSaved();
+        onClose();
       } else {
-         await axios.post("/allocations" , payload);
+        await axios.post('/allocations', payload);
+        const selectedAccount = accounts.find(a => a.id === accountId);
+        const newBalance = selectedAccount
+          ? Number(selectedAccount.currentBalance) - Number(totalAmount)
+          : null;
+        setRemainingBalance(newBalance);
+        onSaved();
+        setTimeout(() => {
+          setRemainingBalance(null);
+          onClose();
+        }, 4000);
       }
-
-      onSaved();
-      onClose();
     } catch (err) {
       console.error(err);
       alert("Hubo un error al guardar el reparto.");
@@ -126,7 +139,7 @@ export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: Alloc
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Total a distribuir</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
-                <input type="number" step="0.01" required value={totalAmount} onChange={e => setTotalAmount(e.target.value)} placeholder="0.00" className="w-full h-12 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-8 pr-4 text-lg font-black text-slate-900 dark:text-slate-100 placeholder:font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
+                <CurrencyInput required value={totalAmount} onChange={setTotalAmount} placeholder="0" className="w-full h-12 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-8 pr-4 text-lg font-black text-slate-900 dark:text-slate-100 placeholder:font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
               </div>
             </div>
 
@@ -136,6 +149,28 @@ export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: Alloc
               <SearchableSelect options={accountOptions} value={accountId} onChange={setAccountId} placeholder="Buscar cuenta..." />
             </div>
 
+            {/* Saldo disponible */}
+            {accountId && (() => {
+              const selected = accounts.find(a => a.id === accountId);
+              if (!selected) return null;
+              const available = Number(selected.currentBalance);
+              const amount = Number(totalAmount) || 0;
+              const isInsufficient = amount > 0 && amount > available;
+              return (
+                <div className={`md:col-span-2 rounded-xl px-4 py-3 flex items-center justify-between border ${isInsufficient ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`material-symbols-outlined text-base ${isInsufficient ? 'text-rose-500' : 'text-slate-400'}`}>account_balance_wallet</span>
+                    <span className={`text-xs font-bold uppercase tracking-wide ${isInsufficient ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                      Disponible en cuenta
+                    </span>
+                  </div>
+                  <span className={`text-sm font-black ${isInsufficient ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>
+                    {formatCurrency(available)}
+                  </span>
+                </div>
+              );
+            })()}
+
             {/* Notas */}
             <div className="space-y-1.5 md:col-span-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Notas / Descripción</label>
@@ -144,11 +179,23 @@ export const AllocationModal = ({ isOpen, onClose, onSaved, initialData }: Alloc
 
           </div>
 
-          <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+          {remainingBalance !== null && (
+            <div className="mt-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-4 py-3 flex items-center justify-between animate-in fade-in duration-300">
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+                <span className="material-symbols-outlined text-base">check_circle</span>
+                <span className="text-xs font-bold uppercase tracking-wide">Reparto guardado — Saldo restante</span>
+              </div>
+              <span className="text-sm font-black text-emerald-700 dark:text-emerald-400">
+                {formatCurrency(remainingBalance)}
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
             <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
               Cancelar
             </button>
-            <button type="submit" disabled={isSubmitting} className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-70 disabled:pointer-events-none">
+            <button type="submit" disabled={isSubmitting || remainingBalance !== null} className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-70 disabled:pointer-events-none">
               {isSubmitting ? 'Guardando...' : 'Guardar Reparto'}
             </button>
           </div>

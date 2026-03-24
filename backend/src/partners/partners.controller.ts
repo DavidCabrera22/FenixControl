@@ -6,13 +6,16 @@
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { PartnersService } from './partners.service';
 import { CreatePartnerDto } from './dto/create-partner.dto';
 import { UpdatePartnerDto } from './dto/update-partner.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Partners')
+@UseGuards(JwtAuthGuard)
 @Controller('partners')
 export class PartnersController {
   constructor(private readonly partnersService: PartnersService) {}

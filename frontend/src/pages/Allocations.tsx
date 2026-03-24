@@ -95,11 +95,15 @@ export const Allocations = () => {
     return true;
   });
 
-  const totalPages = Math.ceil(filteredAllocations.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAllocations.length / itemsPerPage) || 1;
   const paginatedAllocations = filteredAllocations.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const totalDistribuido = filteredAllocations.reduce((sum, a) => sum + Number(a.totalAmount), 0);
+  const totalOpen = filteredAllocations.filter(a => a.status === 'OPEN').reduce((sum, a) => sum + Number(a.totalAmount), 0);
+  const totalClosed = filteredAllocations.filter(a => a.status === 'CLOSED').reduce((sum, a) => sum + Number(a.totalAmount), 0);
 
   const getStatusColor = (status: string) => {
     if (status === 'CLOSED') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800';
@@ -174,6 +178,31 @@ export const Allocations = () => {
         </div>
       </div>
 
+      {/* Summary cards — react to active filters */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-5 py-4 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total distribuido</p>
+            <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{formatCurrency(totalDistribuido)}</p>
+          </div>
+          <span className="material-symbols-outlined text-2xl text-primary opacity-70">share</span>
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-5 py-4 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">En borrador</p>
+            <p className="text-xl font-black text-amber-600 mt-0.5">{formatCurrency(totalOpen)}</p>
+          </div>
+          <span className="material-symbols-outlined text-2xl text-amber-400 opacity-70">pending</span>
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-5 py-4 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Confirmados</p>
+            <p className="text-xl font-black text-emerald-600 mt-0.5">{formatCurrency(totalClosed)}</p>
+          </div>
+          <span className="material-symbols-outlined text-2xl text-emerald-500 opacity-70">check_circle</span>
+        </div>
+      </div>
+
       {/* Table */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden relative z-0">
         <div className="overflow-x-auto">
@@ -222,7 +251,7 @@ export const Allocations = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(allocation.totalAmount)}</span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(Number(allocation.totalAmount))}</span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                       {allocation.allocationLines?.length || 0} líneas

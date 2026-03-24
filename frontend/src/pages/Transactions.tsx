@@ -8,18 +8,14 @@ import { TransactionViewModal } from '../components/TransactionViewModal';
 
 interface Transaction {
   id: string;
-  sourceId: string;
   categoryId: string;
-  type: 'INCOME' | 'EXPENSE' | 'ALLOCATION' | 'TRANSFER';
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
   amount: number;
   description: string;
   thirdPartyName?: string;
   date: string;
-  status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
   createdAt: string;
   category?: { name: string };
-  categoryRel?: { name: string, color: string };
-  sourceRel?: { name: string };
   accountFrom?: { name: string };
   accountTo?: { name: string };
 }
@@ -36,8 +32,10 @@ export const Transactions = () => {
   const [selectedTxForView, setSelectedTxForView] = useState<Transaction | null>(null);
 
   // Filters
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState(new Date().toISOString().split('T')[0]);
   const [filterType, setFilterType] = useState('Todos los tipos');
-  const [filterSource, setFilterSource] = useState('Todas las fuentes');
+
   const [filterAccount, setFilterAccount] = useState('Todas las cuentas');
   const [filterCategory, setFilterCategory] = useState('Todas las categorías');
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,27 +58,28 @@ export const Transactions = () => {
   }, []);
 
   const filteredTransactions = transactions.filter(tx => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       tx.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.thirdPartyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.accountFrom?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.accountTo?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
+    const txDate = tx.date.slice(0, 10);
+    const matchesDateFrom = filterDateFrom === '' || txDate >= filterDateFrom;
+    const matchesDateTo = filterDateTo === '' || txDate <= filterDateTo;
+
     const matchesType = filterType === 'Todos los tipos' ||
       (filterType === 'Ingreso' && tx.type === 'INCOME') ||
       (filterType === 'Gasto' && tx.type === 'EXPENSE') ||
       (filterType === 'Transferencia' && tx.type === 'TRANSFER');
-      
-    // (Sources are complex since it is an array. Skipping full source match for mockup simplicity, assuming true if 'Todas')
-    const matchesSource = filterSource === 'Todas las fuentes';
-    
+
     const accName = tx.type === 'INCOME' ? tx.accountTo?.name : tx.accountFrom?.name;
     const matchesAccount = filterAccount === 'Todas las cuentas' || accName === filterAccount;
-    
+
     const matchesCategory = filterCategory === 'Todas las categorías' || tx.category?.name === filterCategory;
 
-    return matchesSearch && matchesType && matchesSource && matchesAccount && matchesCategory;
+    return matchesSearch && matchesDateFrom && matchesDateTo && matchesType && matchesAccount && matchesCategory;
   });
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage) || 1;
@@ -90,8 +89,10 @@ export const Transactions = () => {
   );
 
   const handleClearFilters = () => {
+    setFilterDateFrom('');
+    setFilterDateTo(new Date().toISOString().split('T')[0]);
     setFilterType('Todos los tipos');
-    setFilterSource('Todas las fuentes');
+
     setFilterAccount('Todas las cuentas');
     setFilterCategory('Todas las categorías');
     setCurrentPage(1);
@@ -132,12 +133,24 @@ export const Transactions = () => {
       {/* Quick Search & Filters */}
       <div className="glass-card p-4 md:p-5 space-y-4">
         <div className="flex flex-wrap items-end gap-3 md:gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Rango de fechas</label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
-              <input className="w-full h-10 md:h-11 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 pl-10 pr-4 text-xs md:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-primary/20 transition-all" type="text" placeholder="Seleccionar fechas" />
-            </div>
+          <div className="flex-1 min-w-[140px]">
+            <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Desde</label>
+            <input
+              type="date"
+              value={filterDateFrom}
+              onChange={(e) => { setFilterDateFrom(e.target.value); setCurrentPage(1); }}
+              className="w-full h-10 md:h-11 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 text-xs md:text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+          </div>
+          <div className="flex-1 min-w-[140px]">
+            <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Hasta</label>
+            <input
+              type="date"
+              value={filterDateTo}
+              onChange={(e) => { setFilterDateTo(e.target.value); setCurrentPage(1); }}
+              min={filterDateFrom || undefined}
+              className="w-full h-10 md:h-11 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 text-xs md:text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            />
           </div>
           <div className="flex-1 min-w-[140px]">
             <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Tipo</label>
@@ -148,14 +161,7 @@ export const Transactions = () => {
               <option>Transferencia</option>
             </select>
           </div>
-          <div className="flex-1 min-w-[140px]">
-            <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Fuente</label>
-            <select className="w-full h-10 md:h-11 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 text-xs md:text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer">
-              <option>Todas las fuentes</option>
-              <option>Software</option>
-              <option>Oficina</option>
-            </select>
-          </div>
+
           <div className="flex-1 min-w-[140px]">
             <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Cuenta</label>
             <select value={filterAccount} onChange={(e) => { setFilterAccount(e.target.value); setCurrentPage(1); }} className="w-full h-10 md:h-11 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 text-xs md:text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer">
@@ -191,13 +197,12 @@ export const Transactions = () => {
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Cuenta</th>
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Categoría</th>
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Monto</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {paginatedTransactions.length === 0 ? (
-                  <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No se encontraron movimientos.</td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-slate-500 font-medium">No se encontraron movimientos.</td></tr>
                 ) : (
                   paginatedTransactions.map(tx => (
                     <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer">
@@ -214,10 +219,10 @@ export const Transactions = () => {
                           "px-2 md:px-2.5 py-1 text-[9px] md:text-[10px] font-black rounded uppercase",
                           tx.type === 'INCOME' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
                           tx.type === 'EXPENSE' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400' :
-                          tx.type === 'ALLOCATION' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' :
+                          tx.type === 'TRANSFER' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' :
                           'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
                         )}>
-                          {tx.type === 'INCOME' ? 'Ingreso' : tx.type === 'EXPENSE' ? 'Gasto' : tx.type === 'ALLOCATION' ? 'Reparto' : 'Transferencia'}
+                          {tx.type === 'INCOME' ? 'Ingreso' : tx.type === 'EXPENSE' ? 'Gasto' : 'Transferencia'}
                         </span>
                       </td>
                       <td className="px-4 md:px-6 py-3 md:py-4">
@@ -233,11 +238,6 @@ export const Transactions = () => {
                         tx.type === 'EXPENSE' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
                       )}>
                         {tx.type === 'EXPENSE' ? '-' : ''}{formatCurrency(Number(tx.amount))}
-                      </td>
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 md:px-2.5 py-0.5 text-[10px] md:text-xs font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/50">
-                          {tx.status === 'COMPLETED' ? 'Completado' : tx.status === 'PENDING' ? 'Pendiente' : 'Cancelado'}
-                        </span>
                       </td>
                       <td className="px-4 md:px-6 py-3 md:py-4 text-center">
                         <div className="flex justify-center gap-1 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

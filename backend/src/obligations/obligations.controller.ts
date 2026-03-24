@@ -7,13 +7,16 @@
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { ObligationsService } from './obligations.service';
 import { CreateObligationDto } from './dto/create-obligation.dto';
 import { UpdateObligationDto } from './dto/update-obligation.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Obligations')
+@UseGuards(JwtAuthGuard)
 @Controller('obligations')
 export class ObligationsController {
   constructor(private readonly obligationsService: ObligationsService) {}

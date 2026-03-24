@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { SearchableSelect } from './SearchableSelect';
+import { CurrencyInput } from './CurrencyInput';
 
 interface ObligationModalProps {
   isOpen: boolean;
@@ -158,14 +159,14 @@ export const ObligationModal = ({ isOpen, onClose, onSaved, initialData }: Oblig
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Monto Inicial</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
-                <input type="number" step="0.01" required value={initialAmount} onChange={e => setInitialAmount(e.target.value)} placeholder="0.00" className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-8 pr-4 font-black text-slate-900 dark:text-slate-100 placeholder:font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
+                <CurrencyInput required value={initialAmount} onChange={setInitialAmount} placeholder="0" className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-8 pr-4 font-black text-slate-900 dark:text-slate-100 placeholder:font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
               </div>
             </div>
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Saldo Pendiente</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
-                <input type="number" step="0.01" required value={remainingAmount} onChange={e => setRemainingAmount(e.target.value)} placeholder="0.00" className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-8 pr-4 font-black text-red-600 dark:text-red-400 placeholder:font-medium focus:ring-2 focus:ring-red-500/20 outline-none transition-all"/>
+                <CurrencyInput required value={remainingAmount} onChange={setRemainingAmount} placeholder="0" className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-8 pr-4 font-black text-red-600 dark:text-red-400 placeholder:font-medium focus:ring-2 focus:ring-red-500/20 outline-none transition-all"/>
               </div>
             </div>
 

@@ -30,6 +30,7 @@ async function main() {
     { name: 'Pago de Impuestos', type: 'EXPENSE' },
     { name: 'Servicios Públicos', type: 'EXPENSE' },
     { name: 'Transferencia entre Cuentas', type: 'TRANSFER' },
+    { name: 'Reparto', type: 'EXPENSE' },
     { name: 'Ajuste de Saldo', type: 'ADJUSTMENT' },
   ];
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { CurrencyInput } from './CurrencyInput';
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -118,14 +119,12 @@ export const AccountModal = ({ isOpen, onClose, onSaved, initialData }: AccountM
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Saldo Inicial</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
-              <input 
+              <CurrencyInput
                 required
-                type="number" 
-                step="0.01"
                 value={formData.initialBalance}
-                onChange={e => setFormData({...formData, initialBalance: e.target.value})}
-                placeholder="0.00" 
-                className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white" 
+                onChange={v => setFormData({...formData, initialBalance: v})}
+                placeholder="0"
+                className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white"
               />
             </div>
             {initialData && <p className="text-[10px] text-amber-500 mt-1"><span className="material-symbols-outlined text-[10px] align-middle mr-1">warning</span>Modificar el saldo inicial alterará el saldo actual.</p>}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { SearchableSelect } from './SearchableSelect';
+import { CurrencyInput } from './CurrencyInput';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface TransactionModalProps {
 interface Account {
   id: string;
   name: string;
+  currentBalance: number;
 }
 
 interface Category {
@@ -74,27 +76,20 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       alert("Por favor ingresa un monto válido.");
       return;
     }
-    if (type === 'INCOME' && !accountTo) {
-      alert("Para ingresos, debes seleccionar una Cuenta Destino.");
-      return;
-    }
-    if (type === 'EXPENSE' && !accountFrom) {
-      alert("Para gastos, debes seleccionar una Cuenta Origen.");
+    if ((type === 'INCOME' || type === 'EXPENSE') && !accountFrom) {
+      alert("Debes seleccionar una Cuenta.");
       return;
     }
     if (type === 'TRANSFER' && (!accountFrom || !accountTo)) {
-      alert("Para transferencias, debes seleccionar Cuenta Origen y Destino.");
+      alert("Para transferencias, debes seleccionar Cuenta Origen y Cuenta Destino.");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const payload = {
+      const base = {
         date,
-        type,
         amount: Number(amount),
-        accountFromId: accountFrom || undefined,
-        accountToId: accountTo || undefined,
         categoryId: category || undefined,
         description: description || undefined,
         thirdPartyName: thirdPartyName || undefined,
@@ -102,9 +97,18 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       };
 
       if (initialData?.id) {
-         await axios.patch(`/transactions/${initialData.id}`, payload);
+        const payload = type === 'INCOME'
+          ? { ...base, type: 'INCOME', accountToId: accountFrom, accountFromId: undefined }
+          : { ...base, type: 'EXPENSE', accountFromId: accountFrom, accountToId: undefined };
+        await axios.patch(`/transactions/${initialData.id}`, payload);
+      } else if (type === 'TRANSFER') {
+        // Create two separate transactions: EXPENSE from origin + INCOME to destination
+        await axios.post('/transactions', { ...base, type: 'EXPENSE', accountFromId: accountFrom, description: description || 'Transferencia - Salida' });
+        await axios.post('/transactions', { ...base, type: 'INCOME', accountToId: accountTo, description: description || 'Transferencia - Entrada' });
+      } else if (type === 'INCOME') {
+        await axios.post('/transactions', { ...base, type: 'INCOME', accountToId: accountFrom });
       } else {
-         await axios.post("/transactions" , payload);
+        await axios.post('/transactions', { ...base, type: 'EXPENSE', accountFromId: accountFrom });
       }
 
       onSaved();
@@ -158,7 +162,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
             </div>
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tipo de movimiento</label>
-              <select required value={type} onChange={e => setType(e.target.value)} className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer">
+              <select required value={type} onChange={e => { setType(e.target.value); if (e.target.value !== 'TRANSFER') setAccountTo(''); }} className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer">
                 <option value="INCOME">Ingreso</option>
                 <option value="EXPENSE">Gasto</option>
                 <option value="TRANSFER">Transferencia</option>
@@ -170,18 +174,32 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Monto</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
-                <input type="number" step="0.01" required value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full h-12 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-8 pr-4 text-lg font-black text-slate-900 dark:text-slate-100 placeholder:font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
+                <CurrencyInput required value={amount} onChange={setAmount} placeholder="0" className="w-full h-12 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-8 pr-4 text-lg font-black text-slate-900 dark:text-slate-100 placeholder:font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
               </div>
             </div>
 
             {/* Cuentas */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Cuenta Origen</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                {type === 'TRANSFER' ? 'Cuenta Origen' : 'Cuenta'}
+              </label>
               <SearchableSelect options={accountOptions} value={accountFrom} onChange={setAccountFrom} placeholder="Buscar cuenta..." />
+              {accountFrom && (() => { const acc = accounts.find(a => a.id === accountFrom); return acc ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-400">
+                  <span className="material-symbols-outlined text-[14px]">account_balance_wallet</span>
+                  <span>Disponible: <span className="font-bold text-slate-800 dark:text-slate-200">${Number(acc.currentBalance).toLocaleString('es-CO')}</span></span>
+                </div>
+              ) : null; })()}
             </div>
-            <div className="space-y-1.5">
+            <div className={`space-y-1.5 ${type !== 'TRANSFER' ? 'opacity-40 pointer-events-none' : ''}`}>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Cuenta Destino</label>
               <SearchableSelect options={accountOptions} value={accountTo} onChange={setAccountTo} placeholder="Buscar cuenta..." />
+              {accountTo && type === 'TRANSFER' && (() => { const acc = accounts.find(a => a.id === accountTo); return acc ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-400">
+                  <span className="material-symbols-outlined text-[14px]">account_balance_wallet</span>
+                  <span>Disponible: <span className="font-bold text-slate-800 dark:text-slate-200">${Number(acc.currentBalance).toLocaleString('es-CO')}</span></span>
+                </div>
+              ) : null; })()}
             </div>
 
             {/* Fuentede Fondos */}

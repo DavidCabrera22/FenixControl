@@ -1,5 +1,5 @@
-﻿import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, IsOptional, Length } from 'class-validator';
 
 export class CreatePartnerDto {
   @ApiProperty({ example: 'John Doe', description: 'The name of the partner' })
@@ -7,12 +7,9 @@ export class CreatePartnerDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({
-    example: '123456789',
-    description: 'The unique identification document of the partner',
-  })
+  @ApiPropertyOptional({ example: '123456789' })
   @IsString()
-  @IsNotEmpty()
-  @Length(5, 20)
-  document: string;
+  @IsOptional()
+  @Length(0, 20)
+  document?: string;
 }

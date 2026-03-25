@@ -9,7 +9,7 @@ export class CategoriesService {
 
   async create(createCategoryDto: CreateCategoryDto) {
     return this.prisma.category.create({
-      data: createCategoryDto,
+      data: { ...createCategoryDto, type: createCategoryDto.type ?? 'EXPENSE' },
     });
   }
 

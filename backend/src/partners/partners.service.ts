@@ -9,7 +9,10 @@ export class PartnersService {
 
   async create(createPartnerDto: CreatePartnerDto) {
     return this.prisma.partner.create({
-      data: createPartnerDto,
+      data: {
+        ...createPartnerDto,
+        document: createPartnerDto.document || `AUTO-${Date.now()}`,
+      },
     });
   }
 

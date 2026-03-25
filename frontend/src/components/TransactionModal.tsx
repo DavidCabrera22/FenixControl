@@ -32,17 +32,18 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
   const [categories, setCategories] = useState<Category[]>([]);
   const [sources, setSources] = useState<Source[]>([]);
 
+  const [partners, setPartners] = useState<{ id: string; name: string }[]>([]);
   const [accountFrom, setAccountFrom] = useState('');
   const [accountTo, setAccountTo] = useState('');
   const [category, setCategory] = useState('');
   const [sourceId, setSourceId] = useState('');
+  const [partnerId, setPartnerId] = useState('');
   const [fileName, setFileName] = useState('');
   const [isTransfer, setIsTransfer] = useState(false);
 
   // Form fields
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [amount, setAmount] = useState('');
-  const [thirdPartyName, setThirdPartyName] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,6 +52,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       axios.get('/accounts').then(res => setAccounts(res.data)).catch(console.error);
       axios.get('/categories').then(res => setCategories(res.data)).catch(console.error);
       axios.get('/sources').then(res => setSources(res.data)).catch(console.error);
+      axios.get('/partners').then(res => setPartners(res.data)).catch(console.error);
     }
 
     if (initialData && isOpen) {
@@ -60,7 +62,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setAccountTo('');
       setCategory(initialData.categoryId || '');
       setSourceId('');
-      setThirdPartyName(initialData.thirdPartyName || '');
+      setPartnerId('');
       setDescription(initialData.description || '');
       setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/').pop() : '');
       setIsTransfer(false);
@@ -71,7 +73,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setAccountTo('');
       setCategory('');
       setSourceId('');
-      setThirdPartyName('');
+      setPartnerId('');
       setDescription('');
       setFileName('');
       setIsTransfer(false);
@@ -105,7 +107,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
         amount: Number(amount),
         categoryId: category || undefined,
         description: description || undefined,
-        thirdPartyName: thirdPartyName || undefined,
+        thirdPartyName: partnerId ? partners.find(p => p.id === partnerId)?.name : undefined,
         attachmentUrl: fileName ? `https://dummy-bucket.s3.amazonaws.com/${fileName}` : undefined,
       };
 
@@ -129,9 +131,9 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setAccountTo('');
       setCategory('');
       setSourceId('');
+      setPartnerId('');
       setDate(new Date().toISOString().split('T')[0]);
       setAmount('');
-      setThirdPartyName('');
       setDescription('');
       setIsTransfer(false);
       onClose();
@@ -243,7 +245,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
             </div>
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tercero</label>
-              <input type="text" value={thirdPartyName} onChange={e => setThirdPartyName(e.target.value)} placeholder="Nombre cliente/proveedor" className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
+              <SearchableSelect options={partners.map(p => ({ value: p.id, label: p.name }))} value={partnerId} onChange={setPartnerId} placeholder="Buscar tercero..." />
             </div>
 
             {/* Notas */}

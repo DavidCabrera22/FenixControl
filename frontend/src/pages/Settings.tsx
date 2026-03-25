@@ -6,6 +6,7 @@ import { AccountModal } from '../components/AccountModal';
 import { SourceModal } from '../components/SourceModal';
 import { CategoryModal } from '../components/CategoryModal';
 import { PartnerModal } from '../components/PartnerModal';
+import { ThirdPartyModal } from '../components/ThirdPartyModal';
 
 interface Account {
   id: string;
@@ -40,7 +41,7 @@ interface Partner {
 export const Settings = () => {
   const { globalSearch } = useOutletContext<{ globalSearch: string }>();
   // Active Tab: 'cuentas' | 'fuentes' | 'categorias' | 'socios'
-  const [activeTab, setActiveTab] = useState<'cuentas' | 'fuentes' | 'categorias' | 'socios'>('cuentas');
+  const [activeTab, setActiveTab] = useState<'cuentas' | 'fuentes' | 'categorias' | 'socios' | 'terceros'>('cuentas');
 
   // Accounts Data
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -66,6 +67,10 @@ export const Settings = () => {
   const [showPartnerModal, setShowPartnerModal] = useState(false);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
 
+  // Terceros Data (same /partners endpoint)
+  const [showThirdPartyModal, setShowThirdPartyModal] = useState(false);
+  const [editingThirdParty, setEditingThirdParty] = useState<Partner | null>(null);
+
   // Basic Stats for cards
   const [stats, setStats] = useState({
     sources: 0,
@@ -85,6 +90,9 @@ export const Settings = () => {
       fetchCategories();
     }
     if (activeTab === 'socios') {
+      fetchPartners();
+    }
+    if (activeTab === 'terceros') {
       fetchPartners();
     }
   }, [activeTab]);
@@ -280,11 +288,17 @@ export const Settings = () => {
         >
           Categorías
         </button>
-        <button 
+        <button
            onClick={() => setActiveTab('socios')}
            className={`pb-4 px-1 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'socios' ? 'border-primary text-primary dark:text-white' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
         >
           Socios
+        </button>
+        <button
+           onClick={() => setActiveTab('terceros')}
+           className={`pb-4 px-1 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'terceros' ? 'border-primary text-primary dark:text-white' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+        >
+          Terceros
         </button>
       </div>
 
@@ -472,7 +486,6 @@ export const Settings = () => {
                     <thead>
                       <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Nombre de la Categoría</th>
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Tipo</th>
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right whitespace-nowrap">Acciones</th>
                       </tr>
                     </thead>
@@ -483,20 +496,18 @@ export const Settings = () => {
                         </tr>
                       ) : filteredCategories.length === 0 ? (
                         <tr>
-                          <td colSpan={3} className="px-6 py-8 text-center text-slate-500">No se encontraron categorías con la búsqueda actual.</td>
+                          <td colSpan={2} className="px-6 py-8 text-center text-slate-500">No se encontraron categorías con la búsqueda actual.</td>
                         </tr>
                       ) : (
                         filteredCategories.map(cat => (
                           <tr key={cat.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                                  <span className="material-symbols-outlined text-sm">label</span>
+                                </div>
                                 <span className="font-semibold text-slate-800 dark:text-slate-200">{cat.name}</span>
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${cat.type === 'INCOME' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' : 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800/50'}`}>
-                                {cat.type === 'INCOME' ? 'Ingreso' : 'Gasto'}
-                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -582,9 +593,80 @@ export const Settings = () => {
               </div>
             </div>
          )}
+         {activeTab === 'terceros' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Listado de Terceros</h3>
+                  <p className="text-sm text-slate-500">Clientes, proveedores y otras partes relacionadas en movimientos.</p>
+                </div>
+                <button
+                   onClick={() => { setEditingThirdParty(null); setShowThirdPartyModal(true); }}
+                   className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  <span className="material-symbols-outlined text-lg">add</span>
+                  Nuevo Tercero
+                </button>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Nombre / Razón Social</th>
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">NIT / C.C.</th>
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right whitespace-nowrap">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {isPartnersLoading ? (
+                        <tr><td colSpan={3} className="px-6 py-8 text-center text-slate-500">Cargando terceros...</td></tr>
+                      ) : filteredPartners.length === 0 ? (
+                        <tr><td colSpan={3} className="px-6 py-8 text-center text-slate-500">No hay terceros registrados.</td></tr>
+                      ) : (
+                        filteredPartners.map(part => (
+                          <tr key={part.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                                  <span className="material-symbols-outlined text-sm">person</span>
+                                </div>
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">{part.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-sm text-slate-500 dark:text-slate-400">{part.document || '—'}</span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                              <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => { setEditingThirdParty(part); setShowThirdPartyModal(true); }} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 transition-colors" title="Editar">
+                                  <span className="material-symbols-outlined text-lg">edit</span>
+                                </button>
+                                <button onClick={() => handleDeletePartner(part.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors" title="Eliminar">
+                                  <span className="material-symbols-outlined text-lg">delete</span>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+         )}
       </div>
 
-      <AccountModal 
+      <ThirdPartyModal
+        isOpen={showThirdPartyModal}
+        onClose={() => setShowThirdPartyModal(false)}
+        onSaved={fetchPartners}
+        initialData={editingThirdParty}
+      />
+
+      <AccountModal
         isOpen={showAccountModal} 
         onClose={() => setShowAccountModal(false)}
         onSaved={fetchAccounts}

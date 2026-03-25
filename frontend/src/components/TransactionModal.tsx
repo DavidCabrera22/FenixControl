@@ -168,21 +168,36 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[80vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            {/* Fecha & Fuente */}
+            {/* Fecha & Transferencia toggle */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Fecha</label>
               <input type="date" required value={date} onChange={e => setDate(e.target.value)} className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Fuente</label>
-              <SearchableSelect options={sourceOptions} value={sourceId} onChange={setSourceId} placeholder="Buscar fuente..." />
-              {selectedSource && (
-                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${selectedSource.type === 'INCOME' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
-                  <span className="material-symbols-outlined text-[12px]">{selectedSource.type === 'INCOME' ? 'trending_up' : 'trending_down'}</span>
-                  {selectedSource.type === 'INCOME' ? 'Ingreso' : 'Gasto'}
+            <div className="space-y-1.5 flex flex-col justify-end">
+              <label
+                className="flex items-center gap-2 cursor-pointer select-none w-fit"
+                onClick={() => { setIsTransfer(!isTransfer); setAccountTo(''); if (!isTransfer) setSourceId(''); }}
+              >
+                <div className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${isTransfer ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${isTransfer ? 'translate-x-4' : 'translate-x-0'}`}/>
                 </div>
-              )}
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Transferencia entre cuentas</span>
+              </label>
             </div>
+
+            {/* Fuente — oculta en transferencia */}
+            {!isTransfer && (
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Fuente</label>
+                <SearchableSelect options={sourceOptions} value={sourceId} onChange={setSourceId} placeholder="Buscar fuente..." />
+                {selectedSource && (
+                  <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${selectedSource.type === 'INCOME' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                    <span className="material-symbols-outlined text-[12px]">{selectedSource.type === 'INCOME' ? 'trending_up' : 'trending_down'}</span>
+                    {selectedSource.type === 'INCOME' ? 'Ingreso' : 'Gasto'}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Monto */}
             <div className="space-y-1.5 md:col-span-2">
@@ -256,19 +271,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
             </div>
           </div>
 
-          {/* Botón de transferencia */}
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => { setIsTransfer(!isTransfer); setAccountTo(''); }}
-              className={`w-full py-2.5 rounded-xl border-2 text-sm font-bold flex items-center justify-center gap-2 transition-all ${isTransfer ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20' : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-primary/50 hover:text-primary'}`}
-            >
-              <span className="material-symbols-outlined text-[18px]">swap_horiz</span>
-              {isTransfer ? 'Cancelar transferencia' : 'Es una transferencia entre cuentas'}
-            </button>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
             <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
               Cancelar
             </button>

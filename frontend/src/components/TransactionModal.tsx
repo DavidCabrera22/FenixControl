@@ -52,7 +52,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       axios.get('/accounts').then(res => setAccounts(res.data)).catch(console.error);
       axios.get('/categories').then(res => setCategories(res.data)).catch(console.error);
       axios.get('/sources').then(res => setSources(res.data)).catch(console.error);
-      axios.get('/partners').then(res => setPartners(res.data)).catch(console.error);
+      axios.get('/third-parties').then(res => setPartners(res.data)).catch(console.error);
     }
 
     if (initialData && isOpen) {

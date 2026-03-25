@@ -11,11 +11,13 @@ import { ObligationsModule } from './obligations/obligations.module';
 import { AllocationsModule } from './allocations/allocations.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ThirdPartiesModule } from './third-parties/third-parties.module';
 
 @Module({
   imports: [
     PrismaModule,
     PartnersModule,
+    ThirdPartiesModule,
     AccountsModule,
     SourcesModule,
     CategoriesModule,

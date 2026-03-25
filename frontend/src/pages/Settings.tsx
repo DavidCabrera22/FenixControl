@@ -67,7 +67,9 @@ export const Settings = () => {
   const [showPartnerModal, setShowPartnerModal] = useState(false);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
 
-  // Terceros Data (same /partners endpoint)
+  // Terceros Data (separate /third-parties endpoint)
+  const [thirdParties, setThirdParties] = useState<Partner[]>([]);
+  const [isThirdPartiesLoading, setIsThirdPartiesLoading] = useState(false);
   const [showThirdPartyModal, setShowThirdPartyModal] = useState(false);
   const [editingThirdParty, setEditingThirdParty] = useState<Partner | null>(null);
 
@@ -93,7 +95,7 @@ export const Settings = () => {
       fetchPartners();
     }
     if (activeTab === 'terceros') {
-      fetchPartners();
+      fetchThirdParties();
     }
   }, [activeTab]);
 
@@ -204,10 +206,33 @@ export const Settings = () => {
     try {
       await axios.delete(`/partners/${id}`);
       fetchPartners();
-      fetchStats(); 
+      fetchStats();
     } catch (err) {
       console.error("Error deleting partner", err);
       alert("No se pudo eliminar el socio. Verifica que no tenga transacciones o fuentes asociadas.");
+    }
+  };
+
+  const fetchThirdParties = async () => {
+    setIsThirdPartiesLoading(true);
+    try {
+      const res = await axios.get('/third-parties');
+      setThirdParties(res.data);
+    } catch (err) {
+      console.error('Error fetching third parties', err);
+    } finally {
+      setIsThirdPartiesLoading(false);
+    }
+  };
+
+  const handleDeleteThirdParty = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de eliminar este tercero?')) return;
+    try {
+      await axios.delete(`/third-parties/${id}`);
+      fetchThirdParties();
+    } catch (err) {
+      console.error('Error deleting third party', err);
+      alert('No se pudo eliminar el tercero.');
     }
   };
 
@@ -620,12 +645,12 @@ export const Settings = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {isPartnersLoading ? (
+                      {isThirdPartiesLoading ? (
                         <tr><td colSpan={3} className="px-6 py-8 text-center text-slate-500">Cargando terceros...</td></tr>
-                      ) : filteredPartners.length === 0 ? (
+                      ) : thirdParties.length === 0 ? (
                         <tr><td colSpan={3} className="px-6 py-8 text-center text-slate-500">No hay terceros registrados.</td></tr>
                       ) : (
-                        filteredPartners.map(part => (
+                        thirdParties.filter(p => !searchLower || p.name.toLowerCase().includes(searchLower)).map(part => (
                           <tr key={part.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
@@ -643,7 +668,7 @@ export const Settings = () => {
                                 <button onClick={() => { setEditingThirdParty(part); setShowThirdPartyModal(true); }} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 transition-colors" title="Editar">
                                   <span className="material-symbols-outlined text-lg">edit</span>
                                 </button>
-                                <button onClick={() => handleDeletePartner(part.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors" title="Eliminar">
+                                <button onClick={() => handleDeleteThirdParty(part.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors" title="Eliminar">
                                   <span className="material-symbols-outlined text-lg">delete</span>
                                 </button>
                               </div>
@@ -662,7 +687,7 @@ export const Settings = () => {
       <ThirdPartyModal
         isOpen={showThirdPartyModal}
         onClose={() => setShowThirdPartyModal(false)}
-        onSaved={fetchPartners}
+        onSaved={fetchThirdParties}
         initialData={editingThirdParty}
       />
 

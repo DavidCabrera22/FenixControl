@@ -20,6 +20,15 @@ model User {
   @@map("users")
 }
 
+model ThirdParty {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  document  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("third_parties")
+}
+
 model Partner {
   id              String           @id @default(uuid()) @db.Uuid
   name            String

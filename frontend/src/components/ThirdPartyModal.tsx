@@ -28,9 +28,9 @@ export const ThirdPartyModal = ({ isOpen, onClose, onSaved, initialData }: Third
     setLoading(true);
     try {
       if (initialData) {
-        await axios.patch(`/partners/${initialData.id}`, formData);
+        await axios.patch(`/third-parties/${initialData.id}`, formData);
       } else {
-        await axios.post('/partners', formData);
+        await axios.post('/third-parties', formData);
       }
       onSaved();
       onClose();

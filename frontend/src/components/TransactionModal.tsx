@@ -33,7 +33,6 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [type, setType] = useState('INCOME');
   const [amount, setAmount] = useState('');
-  const [sourceData, setSourceData] = useState('');
   const [thirdPartyName, setThirdPartyName] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -120,7 +119,6 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setDate(new Date().toISOString().split('T')[0]);
       setType('INCOME');
       setAmount('');
-      setSourceData('');
       setThirdPartyName('');
       setDescription('');
       onClose();
@@ -200,18 +198,6 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
                   <span>Disponible: <span className="font-bold text-slate-800 dark:text-slate-200">${Number(acc.currentBalance).toLocaleString('es-CO')}</span></span>
                 </div>
               ) : null; })()}
-            </div>
-
-            {/* Fuentede Fondos */}
-            <div className="space-y-1.5 md:col-span-2">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Fuente de Fondos</label>
-                <button type="button" className="text-[10px] font-bold text-primary dark:text-slate-400 hover:underline flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px]">call_split</span>
-                  Dividir fuente
-                </button>
-              </div>
-              <input type="text" value={sourceData} onChange={e => setSourceData(e.target.value)} placeholder="Ej: Venta de servicios" className="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 outline-none transition-all"/>
             </div>
 
             {/* Categoria & Tercero */}

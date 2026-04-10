@@ -32,11 +32,13 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
   const [categories, setCategories] = useState<Category[]>([]);
   const [sources, setSources] = useState<Source[]>([]);
 
+  const [thirdParties, setThirdParties] = useState<{ id: string; name: string }[]>([]);
   const [partners, setPartners] = useState<{ id: string; name: string }[]>([]);
   const [accountFrom, setAccountFrom] = useState('');
   const [accountTo, setAccountTo] = useState('');
   const [category, setCategory] = useState('');
   const [sourceId, setSourceId] = useState('');
+  const [thirdPartyId, setThirdPartyId] = useState('');
   const [partnerId, setPartnerId] = useState('');
   const [fileName, setFileName] = useState('');
   const [isTransfer, setIsTransfer] = useState(false);
@@ -52,7 +54,8 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       axios.get('/accounts').then(res => setAccounts(res.data)).catch(console.error);
       axios.get('/categories').then(res => setCategories(res.data)).catch(console.error);
       axios.get('/sources').then(res => setSources(res.data)).catch(console.error);
-      axios.get('/third-parties').then(res => setPartners(res.data)).catch(console.error);
+      axios.get('/third-parties').then(res => setThirdParties(res.data)).catch(console.error);
+      axios.get('/partners').then(res => setPartners(res.data)).catch(console.error);
     }
 
     if (initialData && isOpen) {
@@ -62,6 +65,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setAccountTo('');
       setCategory(initialData.categoryId || '');
       setSourceId('');
+      setThirdPartyId('');
       setPartnerId('');
       setDescription(initialData.description || '');
       setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/').pop() : '');
@@ -73,6 +77,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setAccountTo('');
       setCategory('');
       setSourceId('');
+      setThirdPartyId('');
       setPartnerId('');
       setDescription('');
       setFileName('');
@@ -107,7 +112,8 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
         amount: Number(amount),
         categoryId: category || undefined,
         description: description || undefined,
-        thirdPartyName: partnerId ? partners.find(p => p.id === partnerId)?.name : undefined,
+        thirdPartyName: thirdPartyId ? thirdParties.find(t => t.id === thirdPartyId)?.name : undefined,
+        partnerId: partnerId || undefined,
         attachmentUrl: fileName ? `https://dummy-bucket.s3.amazonaws.com/${fileName}` : undefined,
       };
 
@@ -131,6 +137,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
       setAccountTo('');
       setCategory('');
       setSourceId('');
+      setThirdPartyId('');
       setPartnerId('');
       setDate(new Date().toISOString().split('T')[0]);
       setAmount('');
@@ -238,14 +245,20 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
               </div>
             )}
 
-            {/* Categoria & Tercero */}
-            <div className="space-y-1.5">
+            {/* Categoría */}
+            <div className="space-y-1.5 md:col-span-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Categoría</label>
               <SearchableSelect options={categoryOptions} value={category} onChange={setCategory} placeholder="Buscar categoría..." />
             </div>
+
+            {/* Socio & Tercero */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tercero</label>
-              <SearchableSelect options={partners.map(p => ({ value: p.id, label: p.name }))} value={partnerId} onChange={setPartnerId} placeholder="Buscar tercero..." />
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Socio <span className="text-slate-400 font-normal">(opcional)</span></label>
+              <SearchableSelect options={partners.map(p => ({ value: p.id, label: p.name }))} value={partnerId} onChange={setPartnerId} placeholder="Buscar socio..." />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tercero <span className="text-slate-400 font-normal">(opcional)</span></label>
+              <SearchableSelect options={thirdParties.map(t => ({ value: t.id, label: t.name }))} value={thirdPartyId} onChange={setThirdPartyId} placeholder="Buscar tercero..." />
             </div>
 
             {/* Notas */}

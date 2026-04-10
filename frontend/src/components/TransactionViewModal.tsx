@@ -12,6 +12,7 @@ interface Transaction {
   category?: { name: string };
   accountFrom?: { name: string };
   accountTo?: { name: string };
+  partner?: { name: string };
   attachmentUrl?: string;
 }
 
@@ -69,6 +70,14 @@ export const TransactionViewModal = ({ transaction, isOpen, onClose }: Transacti
                   {transaction.category?.name || 'General'}
                 </p>
              </div>
+             {transaction.partner && (
+               <div className="col-span-2">
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Socio</p>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    {transaction.partner.name}
+                  </p>
+               </div>
+             )}
              {transaction.thirdPartyName && (
                <div className="col-span-2">
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Tercero</p>

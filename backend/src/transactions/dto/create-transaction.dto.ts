@@ -97,6 +97,11 @@ export class CreateTransactionDto {
   @IsString()
   attachmentUrl?: string;
 
+  @ApiProperty({ description: 'Partner (socio) UUID linked to this transaction', required: false })
+  @IsOptional()
+  @IsUUID()
+  partnerId?: string;
+
   @ApiProperty({
     type: [TransactionSourceItemDto],
     description: 'Virtual sources that fund this transaction',

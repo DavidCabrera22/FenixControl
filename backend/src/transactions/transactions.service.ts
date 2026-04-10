@@ -22,6 +22,7 @@ export class TransactionsService {
           description: dto.description ?? null,
           thirdPartyName: dto.thirdPartyName ?? null,
           attachmentUrl: dto.attachmentUrl ?? null,
+          partnerId: dto.partnerId ?? null,
         },
       });
 
@@ -83,6 +84,7 @@ export class TransactionsService {
           accountFrom: true,
           accountTo: true,
           category: true,
+          partner: true,
           transactionSources: { include: { source: true } },
         },
       });
@@ -95,6 +97,7 @@ export class TransactionsService {
         accountFrom: true,
         accountTo: true,
         category: true,
+        partner: true,
         transactionSources: { include: { source: true } },
       },
       orderBy: { date: 'desc' },
@@ -141,6 +144,7 @@ export class TransactionsService {
         accountFrom: true,
         accountTo: true,
         category: true,
+        partner: true,
         transactionSources: { include: { source: true } },
       },
     });

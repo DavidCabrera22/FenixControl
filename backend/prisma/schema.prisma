@@ -37,6 +37,7 @@ model Partner {
   sources         Source[]
   obligations     Obligation[]
   allocationLines AllocationLine[]
+  transactions    Transaction[]
 
   @@map("partners")
 }
@@ -103,6 +104,9 @@ model Transaction {
   description    String? @db.Text
   thirdPartyName String? @map("third_party_name")
   attachmentUrl  String? @map("attachment_url")
+
+  partnerId String?  @map("partner_id") @db.Uuid
+  partner   Partner? @relation(fields: [partnerId], references: [id])
 
   transactionSources TransactionSource[]
 

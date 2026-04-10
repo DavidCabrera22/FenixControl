@@ -9,11 +9,13 @@ interface ObligationPaymentModalProps {
   onPaymentSuccess: () => void;
   obligation: Record<string, unknown> | null;
   accounts: { id: string; name: string }[];
+  partners: { id: string; name: string }[];
 }
 
-export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obligation, accounts }: ObligationPaymentModalProps) => {
+export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obligation, accounts, partners }: ObligationPaymentModalProps) => {
   const [amount, setAmount] = useState('');
   const [accountId, setAccountId] = useState('');
+  const [partnerId, setPartnerId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen || !obligation) return null;
@@ -31,7 +33,7 @@ export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obli
        alert("El monto debe ser numérico y mayor a 0.");
        return;
     }
-    
+
     if (paymentAmount > Number(ob.remainingAmount)) {
        alert("El monto a pagar no puede ser mayor al saldo pendiente de la obligación.");
        return;
@@ -40,16 +42,20 @@ export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obli
     setIsSubmitting(true);
     try {
       // Create a transaction representing the payment
-      const transactionPayload = {
+      const transactionPayload: Record<string, unknown> = {
         date: new Date().toISOString(),
-        type: ob.type === 'DEBT' ? 'EXPENSE' : 'INCOME', // If it's a debt we pay (Expense). If they owe us, they pay (Income). Adjust based on exact business logic
+        type: ob.type === 'DEBT' ? 'EXPENSE' : 'INCOME',
         amount: paymentAmount,
         accountId: accountId,
         description: `Abono a obligación: ${ob.name}`,
         thirdPartyName: ob.partner?.name,
       };
 
-      await axios.post("/transactions" , transactionPayload);
+      if (partnerId) {
+        transactionPayload.partnerId = partnerId;
+      }
+
+      await axios.post("/transactions", transactionPayload);
 
       // Update the obligation remaining balance
       const newRemaining = Number(ob.remainingAmount) - paymentAmount;
@@ -71,11 +77,12 @@ export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obli
   };
 
   const accountOptions = accounts.map(a => ({ value: a.id, label: a.name }));
+  const partnerOptions = partners.map(p => ({ value: p.id, label: p.name }));
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/50 dark:bg-background-dark/80 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-      
+
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4">
           <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-500">
@@ -108,6 +115,13 @@ export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obli
              <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Cuenta de Origen / Pago</label>
                 <SearchableSelect options={accountOptions} value={accountId} onChange={setAccountId} placeholder="Buscar cuenta..." />
+             </div>
+
+             <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Socio <span className="text-slate-400 font-normal">(opcional)</span>
+                </label>
+                <SearchableSelect options={partnerOptions} value={partnerId} onChange={setPartnerId} placeholder="Buscar socio..." />
              </div>
           </div>
 

@@ -15,6 +15,7 @@ interface Transaction {
   accountFrom?: { name: string };
   accountTo?: { name: string };
   category?: { name: string };
+  partner?: { name: string };
   status: string;
   createdAt: string;
   attachmentUrl?: string;
@@ -117,6 +118,8 @@ export const ObligationMovements = () => {
               <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest w-32">Fecha</th>
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest">Descripción</th>
+                <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest">Socio</th>
+                <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest">Tercero</th>
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest text-right">Monto</th>
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest text-right w-24">Acciones</th>
               </tr>
@@ -124,14 +127,14 @@ export const ObligationMovements = () => {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
               {isLoading ? (
                 <tr>
-                   <td colSpan={4} className="px-6 py-20 text-center text-slate-500">
+                   <td colSpan={6} className="px-6 py-20 text-center text-slate-500">
                      <span className="material-symbols-outlined animate-spin text-4xl mb-4 text-primary opacity-50">progress_activity</span>
                      <p className="font-medium text-sm">Cargando movimientos...</p>
                    </td>
                 </tr>
               ) : paginatedMovements.length === 0 ? (
                  <tr>
-                   <td colSpan={4} className="px-6 py-20 text-center text-slate-500">
+                   <td colSpan={6} className="px-6 py-20 text-center text-slate-500">
                      <span className="material-symbols-outlined text-4xl mb-2 opacity-50">receipt_long</span>
                      <p className="font-medium text-sm">No se encontraron movimientos</p>
                    </td>
@@ -149,7 +152,17 @@ export const ObligationMovements = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{tx.description}</div>
-                      <div className="text-xs text-slate-500 font-medium mt-0.5">{tx.accountTo?.name || tx.accountFrom?.name || 'Movimiento'} • {tx.thirdPartyName || 'Sin Tercero'}</div>
+                      <div className="text-xs text-slate-500 font-medium mt-0.5">{tx.accountTo?.name || tx.accountFrom?.name || 'Movimiento'}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        {tx.partner?.name || <span className="text-slate-400 font-normal">—</span>}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        {tx.thirdPartyName || <span className="text-slate-400 font-normal">—</span>}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className={clsx("text-sm font-black text-slate-900 dark:text-slate-100")}>

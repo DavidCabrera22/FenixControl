@@ -24,12 +24,18 @@ interface Account {
   name: string;
 }
 
+interface Partner {
+  id: string;
+  name: string;
+}
+
 export const Obligaciones = () => {
   const { globalSearchTerm } = useOutletContext<{ globalSearchTerm: string }>();
   const navigate = useNavigate();
 
   const [obligations, setObligations] = useState<Obligation[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Pagination states
@@ -48,12 +54,14 @@ export const Obligaciones = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [obsRes, accsRes] = await Promise.all([
+      const [obsRes, accsRes, partnersRes] = await Promise.all([
         axios.get("/obligations"),
-        axios.get("/accounts")
+        axios.get("/accounts"),
+        axios.get("/partners")
       ]);
       setObligations(obsRes.data);
       setAccounts(accsRes.data);
+      setPartners(partnersRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -376,12 +384,13 @@ export const Obligaciones = () => {
         initialData={selectedObligation as any}
       />
 
-       <ObligationPaymentModal 
+       <ObligationPaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => { setIsPaymentModalOpen(false); setSelectedObligation(null); }}
         onPaymentSuccess={fetchData}
         obligation={selectedObligation as any}
         accounts={accounts}
+        partners={partners}
       />
     </div>
   );

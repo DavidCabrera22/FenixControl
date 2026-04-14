@@ -145,23 +145,47 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   const totalExpense = filteredData.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + Number(t.amount), 0);
   const totalNet = totalIncome - totalExpense;
 
-  const summaryBySource: Record<string, { name: string; income: number; expense: number }> = {};
+  // Summary grouped by Category -> Type (Income/Expense) -> Source
+  const summaryByCategory: Record<string, {
+    name: string;
+    incomeSources: Record<string, number>;
+    expenseSources: Record<string, number>;
+    totalIncome: number;
+    totalExpense: number;
+  }> = {};
+
   filteredData.forEach(t => {
-    if (t.transactionSources && t.transactionSources.length > 0) {
-      t.transactionSources.forEach(ts => {
-        const name = ts.source?.name ?? 'Sin fuente';
-        if (!summaryBySource[name]) summaryBySource[name] = { name, income: 0, expense: 0 };
-        if (t.type === 'INCOME') summaryBySource[name].income += Number(ts.amount);
-        else if (t.type === 'EXPENSE') summaryBySource[name].expense += Number(ts.amount);
-      });
-    } else {
-      const name = 'Sin fuente';
-      if (!summaryBySource[name]) summaryBySource[name] = { name, income: 0, expense: 0 };
-      if (t.type === 'INCOME') summaryBySource[name].income += Number(t.amount);
-      else if (t.type === 'EXPENSE') summaryBySource[name].expense += Number(t.amount);
+    const catName = t.category?.name ?? 'Sin categoría';
+    if (!summaryByCategory[catName]) {
+      summaryByCategory[catName] = { name: catName, incomeSources: {}, expenseSources: {}, totalIncome: 0, totalExpense: 0 };
+    }
+    const cat = summaryByCategory[catName];
+    const amount = Number(t.amount);
+
+    if (t.type === 'INCOME') {
+      cat.totalIncome += amount;
+      if (t.transactionSources && t.transactionSources.length > 0) {
+        t.transactionSources.forEach(ts => {
+          const sName = ts.source?.name ?? 'Sin fuente';
+          cat.incomeSources[sName] = (cat.incomeSources[sName] || 0) + Number(ts.amount);
+        });
+      } else {
+        cat.incomeSources['Sin fuente'] = (cat.incomeSources['Sin fuente'] || 0) + amount;
+      }
+    } else if (t.type === 'EXPENSE') {
+      cat.totalExpense += amount;
+      if (t.transactionSources && t.transactionSources.length > 0) {
+        t.transactionSources.forEach(ts => {
+          const sName = ts.source?.name ?? 'Sin fuente';
+          cat.expenseSources[sName] = (cat.expenseSources[sName] || 0) + Number(ts.amount);
+        });
+      } else {
+        cat.expenseSources['Sin fuente'] = (cat.expenseSources['Sin fuente'] || 0) + amount;
+      }
     }
   });
-  const summaryRows = Object.values(summaryBySource).sort((a, b) => (b.income + b.expense) - (a.income + a.expense));
+
+  const summaryCategories = Object.values(summaryByCategory).sort((a, b) => (b.totalIncome + b.totalExpense) - (a.totalIncome + a.totalExpense));
 
   // Active filter labels
   const activeFilters: string[] = [];
@@ -263,7 +287,7 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                     <div className="space-y-1.5">
                       <label className="block text-xs font-bold text-slate-500">Categoría</label>
                       <SearchableSelect
-                        options={categories.map(c => ({ value: c.id, label: c.name }))}
+                        options={[{ value: '', label: 'Todas las categorías' }, ...categories.map(c => ({ value: c.id, label: c.name }))]}
                         value={selectedCategory}
                         onChange={setSelectedCategory}
                         placeholder="Todas las categorías..."
@@ -487,49 +511,92 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                   </div>
                 )}
 
-                {/* Summary Table */}
+                {/* Summary: Grouped by Category -> Type -> Sources */}
                 {reportType === 'summary' && (
-                  <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #e2e8f0' }}>
-                    <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ backgroundColor: '#f8fafc' }}>
-                          <th className="px-5 py-3.5 text-xs font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Fuente</th>
-                          <th className="px-5 py-3.5 text-xs font-black uppercase tracking-wider text-right" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Ingresos</th>
-                          <th className="px-5 py-3.5 text-xs font-black uppercase tracking-wider text-right" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Gastos</th>
-                          <th className="px-5 py-3.5 text-xs font-black uppercase tracking-wider text-right" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Neto</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {summaryRows.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} className="px-5 py-12 text-center text-sm" style={{ color: '#94a3b8' }}>
-                              No se encontraron movimientos con los filtros seleccionados
-                            </td>
-                          </tr>
-                        ) : (
-                          summaryRows.map((row, i) => (
-                            <tr key={row.name} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                              <td className="px-5 py-3 text-sm font-semibold" style={{ color: '#334155' }}>{row.name}</td>
-                              <td className="px-5 py-3 text-sm font-bold text-right" style={{ color: '#15803d' }}>{formatCurrency(row.income)}</td>
-                              <td className="px-5 py-3 text-sm font-bold text-right" style={{ color: '#dc2626' }}>{formatCurrency(row.expense)}</td>
-                              <td className="px-5 py-3 text-sm font-black text-right" style={{ color: row.income - row.expense >= 0 ? '#15803d' : '#dc2626' }}>
-                                {formatCurrency(row.income - row.expense)}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                      {summaryRows.length > 0 && (
-                        <tfoot>
-                          <tr style={{ backgroundColor: '#f1f5f9', borderTop: '2px solid #cbd5e1' }}>
-                            <td className="px-5 py-3.5 text-sm font-black uppercase" style={{ color: '#334155' }}>Total</td>
-                            <td className="px-5 py-3.5 text-sm font-black text-right" style={{ color: '#15803d' }}>{formatCurrency(totalIncome)}</td>
-                            <td className="px-5 py-3.5 text-sm font-black text-right" style={{ color: '#dc2626' }}>{formatCurrency(totalExpense)}</td>
-                            <td className="px-5 py-3.5 text-sm font-black text-right" style={{ color: totalNet >= 0 ? '#15803d' : '#dc2626' }}>{formatCurrency(totalNet)}</td>
-                          </tr>
-                        </tfoot>
-                      )}
-                    </table>
+                  <div className="space-y-5">
+                    {summaryCategories.length === 0 ? (
+                      <div className="rounded-xl p-12 text-center text-sm" style={{ border: '1px solid #e2e8f0', color: '#94a3b8' }}>
+                        No se encontraron movimientos con los filtros seleccionados
+                      </div>
+                    ) : (
+                      <>
+                        {summaryCategories.map(cat => (
+                          <div key={cat.name} className="rounded-xl overflow-hidden" style={{ border: '1px solid #e2e8f0' }}>
+                            {/* Category Header */}
+                            <div className="px-5 py-3 flex items-center justify-between" style={{ backgroundColor: '#1e293b' }}>
+                              <span className="text-sm font-black text-white uppercase tracking-wider">{cat.name}</span>
+                              <span className="text-xs font-bold" style={{ color: cat.totalIncome - cat.totalExpense >= 0 ? '#86efac' : '#fca5a5' }}>
+                                Neto: {formatCurrency(cat.totalIncome - cat.totalExpense)}
+                              </span>
+                            </div>
+
+                            {/* Ingresos */}
+                            {Object.keys(cat.incomeSources).length > 0 && (
+                              <>
+                                <div className="px-5 py-2 flex items-center gap-2" style={{ backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0' }}>
+                                  <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#15803d' }}>Ingresos</span>
+                                </div>
+                                <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+                                  <tbody>
+                                    {Object.entries(cat.incomeSources).sort((a, b) => b[1] - a[1]).map(([sourceName, amount], i) => (
+                                      <tr key={sourceName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                                        <td className="px-5 py-2 pl-8 text-xs font-medium" style={{ color: '#334155' }}>{sourceName}</td>
+                                        <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#15803d' }}>{formatCurrency(amount)}</td>
+                                      </tr>
+                                    ))}
+                                    <tr style={{ backgroundColor: '#f0fdf4', borderTop: '1px solid #bbf7d0' }}>
+                                      <td className="px-5 py-2 pl-8 text-xs font-black" style={{ color: '#15803d' }}>Subtotal Ingresos</td>
+                                      <td className="px-5 py-2 text-xs font-black text-right" style={{ color: '#15803d' }}>{formatCurrency(cat.totalIncome)}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </>
+                            )}
+
+                            {/* Egresos */}
+                            {Object.keys(cat.expenseSources).length > 0 && (
+                              <>
+                                <div className="px-5 py-2 flex items-center gap-2" style={{ backgroundColor: '#fff1f2', borderBottom: '1px solid #fecdd3' }}>
+                                  <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#dc2626' }}>Egresos</span>
+                                </div>
+                                <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+                                  <tbody>
+                                    {Object.entries(cat.expenseSources).sort((a, b) => b[1] - a[1]).map(([sourceName, amount], i) => (
+                                      <tr key={sourceName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                                        <td className="px-5 py-2 pl-8 text-xs font-medium" style={{ color: '#334155' }}>{sourceName}</td>
+                                        <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#dc2626' }}>{formatCurrency(amount)}</td>
+                                      </tr>
+                                    ))}
+                                    <tr style={{ backgroundColor: '#fff1f2', borderTop: '1px solid #fecdd3' }}>
+                                      <td className="px-5 py-2 pl-8 text-xs font-black" style={{ color: '#dc2626' }}>Subtotal Egresos</td>
+                                      <td className="px-5 py-2 text-xs font-black text-right" style={{ color: '#dc2626' }}>{formatCurrency(cat.totalExpense)}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </>
+                            )}
+                          </div>
+                        ))}
+
+                        {/* Grand Total */}
+                        <div className="rounded-xl overflow-hidden" style={{ border: '2px solid #cbd5e1' }}>
+                          <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+                            <tbody>
+                              <tr style={{ backgroundColor: '#f1f5f9' }}>
+                                <td className="px-5 py-3 text-sm font-black uppercase" style={{ color: '#334155' }}>Total General</td>
+                                <td className="px-5 py-3 text-right">
+                                  <div className="text-xs font-bold" style={{ color: '#15803d' }}>Ingresos: {formatCurrency(totalIncome)}</div>
+                                  <div className="text-xs font-bold" style={{ color: '#dc2626' }}>Egresos: {formatCurrency(totalExpense)}</div>
+                                  <div className="text-sm font-black mt-1 pt-1" style={{ color: totalNet >= 0 ? '#15803d' : '#dc2626', borderTop: '1px solid #cbd5e1' }}>
+                                    Neto: {formatCurrency(totalNet)}
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 

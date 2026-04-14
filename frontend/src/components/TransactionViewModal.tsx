@@ -14,6 +14,7 @@ interface Transaction {
   accountTo?: { name: string };
   partner?: { name: string };
   attachmentUrl?: string;
+  transactionSources?: { source: { name: string }; amount: number }[];
 }
 
 interface TransactionViewModalProps {
@@ -84,6 +85,19 @@ export const TransactionViewModal = ({ transaction, isOpen, onClose }: Transacti
                   <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                     {transaction.thirdPartyName}
                   </p>
+               </div>
+             )}
+             {transaction.transactionSources && transaction.transactionSources.length > 0 && (
+               <div className="col-span-2">
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Fuente</p>
+                  <div className="space-y-1">
+                    {transaction.transactionSources.map((ts, i) => (
+                      <div key={i} className="flex items-center justify-between text-sm">
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">{ts.source.name}</span>
+                        <span className="font-medium text-slate-500">{formatCurrency(Number(ts.amount))}</span>
+                      </div>
+                    ))}
+                  </div>
                </div>
              )}
              {transaction.description && (

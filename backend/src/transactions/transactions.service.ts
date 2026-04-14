@@ -136,6 +136,7 @@ export class TransactionsService {
     if (dto.description !== undefined) data.description = dto.description || null;
     if (dto.thirdPartyName !== undefined) data.thirdPartyName = dto.thirdPartyName || null;
     if (dto.attachmentUrl !== undefined) data.attachmentUrl = dto.attachmentUrl || null;
+    if (dto.partnerId !== undefined) data.partnerId = dto.partnerId || null;
 
     return this.prisma.transaction.update({
       where: { id },

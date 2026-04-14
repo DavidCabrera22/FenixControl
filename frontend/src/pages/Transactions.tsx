@@ -5,6 +5,7 @@ import { formatCurrency } from '../lib/utils';
 import { clsx } from 'clsx';
 import { TransactionModal } from '../components/TransactionModal';
 import { TransactionViewModal } from '../components/TransactionViewModal';
+import { TransactionReportModal } from '../components/TransactionReportModal';
 
 interface Transaction {
   id: string;
@@ -30,6 +31,7 @@ export const Transactions = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedTxForEdit, setSelectedTxForEdit] = useState<Transaction | null>(null);
   const [selectedTxForView, setSelectedTxForView] = useState<Transaction | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Filters
   const [filterDateFrom, setFilterDateFrom] = useState('');
@@ -121,13 +123,22 @@ export const Transactions = () => {
           <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">Movimientos</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base">Registro y control de ingresos, gastos, transferencias y pagos</p>
         </div>
-        <button 
-          onClick={() => { setSelectedTxForEdit(null); setIsModalOpen(true); }}
-          className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 md:px-5 py-2.5 text-sm md:text-base font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all w-full md:w-auto"
-        >
-          <span className="material-symbols-outlined text-lg">add</span>
-          <span>Nuevo Movimiento</span>
-        </button>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <button
+            onClick={() => setIsReportModalOpen(true)}
+            className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 md:px-5 py-2.5 text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all w-full md:w-auto shadow-sm"
+          >
+            <span className="material-symbols-outlined text-lg">description</span>
+            <span>Crear Reporte</span>
+          </button>
+          <button
+            onClick={() => { setSelectedTxForEdit(null); setIsModalOpen(true); }}
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 md:px-5 py-2.5 text-sm md:text-base font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all w-full md:w-auto"
+          >
+            <span className="material-symbols-outlined text-lg">add</span>
+            <span>Nuevo Movimiento</span>
+          </button>
+        </div>
       </div>
 
       {/* Quick Search & Filters */}
@@ -298,6 +309,7 @@ export const Transactions = () => {
 
       <TransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSaved={fetchTransactions} initialData={selectedTxForEdit} />
       <TransactionViewModal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} transaction={selectedTxForView} />
+      <TransactionReportModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} />
     </div>
   );
 };

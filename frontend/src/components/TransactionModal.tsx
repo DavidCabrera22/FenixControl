@@ -50,39 +50,66 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      axios.get('/accounts').then(res => setAccounts(res.data)).catch(console.error);
-      axios.get('/categories').then(res => setCategories(res.data)).catch(console.error);
-      axios.get('/sources').then(res => setSources(res.data)).catch(console.error);
-      axios.get('/third-parties').then(res => setThirdParties(res.data)).catch(console.error);
-      axios.get('/partners').then(res => setPartners(res.data)).catch(console.error);
-    }
+    if (!isOpen) return;
 
-    if (initialData && isOpen) {
-      setDate(initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
-      setAmount(initialData.amount ? String(initialData.amount) : '');
-      setAccountFrom(initialData.accountFrom?.id || initialData.accountFromId || initialData.accountTo?.id || initialData.accountToId || '');
-      setAccountTo('');
-      setCategory(initialData.categoryId || '');
-      setSourceId('');
-      setThirdPartyId('');
-      setPartnerId('');
-      setDescription(initialData.description || '');
-      setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/').pop() : '');
-      setIsTransfer(false);
-    } else if (!initialData && isOpen) {
-      setDate(new Date().toISOString().split('T')[0]);
-      setAmount('');
-      setAccountFrom('');
-      setAccountTo('');
-      setCategory('');
-      setSourceId('');
-      setThirdPartyId('');
-      setPartnerId('');
-      setDescription('');
-      setFileName('');
-      setIsTransfer(false);
-    }
+    const loadData = async () => {
+      try {
+        const [accountsRes, categoriesRes, sourcesRes, thirdPartiesRes, partnersRes] = await Promise.all([
+          axios.get('/accounts'),
+          axios.get('/categories'),
+          axios.get('/sources'),
+          axios.get('/third-parties'),
+          axios.get('/partners'),
+        ]);
+        setAccounts(accountsRes.data);
+        setCategories(categoriesRes.data);
+        setSources(sourcesRes.data);
+        setThirdParties(thirdPartiesRes.data);
+        setPartners(partnersRes.data);
+
+        if (initialData) {
+          setDate(initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+          setAmount(initialData.amount ? String(initialData.amount) : '');
+          setAccountFrom(initialData.accountFrom?.id || initialData.accountFromId || initialData.accountTo?.id || initialData.accountToId || '');
+          setAccountTo('');
+          setCategory(initialData.category?.id || initialData.categoryId || '');
+          setPartnerId(initialData.partner?.id || initialData.partnerId || '');
+          setDescription(initialData.description || '');
+          setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/').pop() : '');
+          setIsTransfer(false);
+
+          // Source: take from transactionSources array
+          const firstSource = initialData.transactionSources?.[0];
+          setSourceId(firstSource?.source?.id || firstSource?.sourceId || '');
+
+          // Third party: match by name since it's stored as a string
+          if (initialData.thirdPartyName) {
+            const matched = thirdPartiesRes.data.find(
+              (t: { id: string; name: string }) => t.name === initialData.thirdPartyName
+            );
+            setThirdPartyId(matched?.id || '');
+          } else {
+            setThirdPartyId('');
+          }
+        } else {
+          setDate(new Date().toISOString().split('T')[0]);
+          setAmount('');
+          setAccountFrom('');
+          setAccountTo('');
+          setCategory('');
+          setSourceId('');
+          setThirdPartyId('');
+          setPartnerId('');
+          setDescription('');
+          setFileName('');
+          setIsTransfer(false);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadData();
   }, [isOpen, initialData]);
 
   if (!isOpen) return null;

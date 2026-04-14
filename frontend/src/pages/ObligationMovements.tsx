@@ -19,6 +19,7 @@ interface Transaction {
   status: string;
   createdAt: string;
   attachmentUrl?: string;
+  transactionSources?: { source: { name: string }; amount: number }[];
 }
 
 export const ObligationMovements = () => {
@@ -28,6 +29,7 @@ export const ObligationMovements = () => {
 
   // States
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterPartner, setFilterPartner] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -60,8 +62,14 @@ export const ObligationMovements = () => {
     setIsViewModalOpen(true);
   };
 
+  // Lista única de socios para el filtro
+  const uniquePartners = Array.from(
+    new Set(movements.filter(tx => tx.partner?.name).map(tx => tx.partner!.name))
+  ).sort();
+
   // Filtrado y búsqueda
   const filteredMovements = movements.filter((tx) => {
+    if (filterPartner && tx.partner?.name !== filterPartner) return false;
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       const matchDesc = tx.description?.toLowerCase().includes(searchLower);
@@ -100,13 +108,26 @@ export const ObligationMovements = () => {
       <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
         <div className="relative flex-1 max-w-md">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-          <input 
-            type="text" 
-            placeholder="Buscar por tercero, cuenta o descripción..." 
+          <input
+            type="text"
+            placeholder="Buscar por tercero, cuenta o descripción..."
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm py-2.5 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 text-slate-700 dark:text-slate-300 transition-all outline-none"
           />
+        </div>
+        <div className="relative">
+          <select
+            value={filterPartner}
+            onChange={(e) => { setFilterPartner(e.target.value); setCurrentPage(1); }}
+            className="appearance-none bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-primary/20 text-slate-700 dark:text-slate-300 transition-all outline-none cursor-pointer font-medium"
+          >
+            <option value="">Todos los socios</option>
+            {uniquePartners.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+          <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">expand_more</span>
         </div>
       </div>
 

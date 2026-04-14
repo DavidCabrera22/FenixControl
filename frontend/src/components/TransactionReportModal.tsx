@@ -35,13 +35,11 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   // Filter states
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [selectedSources, setSelectedSources] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedThirdParty, setSelectedThirdParty] = useState('');
   const [selectedPartner, setSelectedPartner] = useState('');
 
   // Data lists
-  const [sources, setSources] = useState<{ id: string; name: string }[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [thirdParties, setThirdParties] = useState<{ id: string; name: string }[]>([]);
   const [partners, setPartners] = useState<{ id: string; name: string }[]>([]);
@@ -58,13 +56,11 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
     if (isOpen) {
       setStep('filters');
       Promise.all([
-        axios.get('/sources'),
         axios.get('/categories'),
         axios.get('/third-parties'),
         axios.get('/partners'),
         axios.get('/transactions'),
-      ]).then(([srcRes, catRes, tpRes, pRes, txRes]) => {
-        setSources(srcRes.data);
+      ]).then(([catRes, tpRes, pRes, txRes]) => {
         setCategories(catRes.data);
         setThirdParties(tpRes.data);
         setPartners(pRes.data);
@@ -73,8 +69,7 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
     } else {
       setDateFrom('');
       setDateTo('');
-      setSelectedSources([]);
-      setSelectedCategories([]);
+      setSelectedCategory('');
       setSelectedThirdParty('');
       setSelectedPartner('');
       setReportType('detailed');
@@ -88,13 +83,8 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
 
     if (dateFrom) result = result.filter(t => t.date.slice(0, 10) >= dateFrom);
     if (dateTo) result = result.filter(t => t.date.slice(0, 10) <= dateTo);
-    if (selectedSources.length > 0) {
-      result = result.filter(t =>
-        t.transactionSources?.some(ts => selectedSources.includes(ts.source?.id))
-      );
-    }
-    if (selectedCategories.length > 0) {
-      result = result.filter(t => t.category && selectedCategories.includes(t.category.id));
+    if (selectedCategory) {
+      result = result.filter(t => t.category?.id === selectedCategory);
     }
     if (selectedThirdParty) {
       const tpName = thirdParties.find(tp => tp.id === selectedThirdParty)?.name;
@@ -180,17 +170,10 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
     const to = dateTo ? new Date(dateTo + 'T00:00:00Z').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'Hoy';
     activeFilters.push(`${from} — ${to}`);
   }
-  if (selectedSources.length > 0) activeFilters.push(`Fuentes: ${selectedSources.map(id => sources.find(s => s.id === id)?.name).join(', ')}`);
-  if (selectedCategories.length > 0) activeFilters.push(`Categorías: ${selectedCategories.map(id => categories.find(c => c.id === id)?.name).join(', ')}`);
+  if (selectedCategory) activeFilters.push(`Categoría: ${categories.find(c => c.id === selectedCategory)?.name}`);
   if (selectedThirdParty) activeFilters.push(`Tercero: ${thirdParties.find(t => t.id === selectedThirdParty)?.name}`);
   if (selectedPartner) activeFilters.push(`Socio: ${partners.find(p => p.id === selectedPartner)?.name}`);
 
-  const toggleSource = (id: string) => {
-    setSelectedSources(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
-  };
-  const toggleCategory = (id: string) => {
-    setSelectedCategories(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
-  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -275,51 +258,16 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                     <span className="material-symbols-outlined text-lg text-primary">filter_alt</span>
                     Filtros Opcionales
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Fuente - Multi select chips */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Categoría */}
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-500">Fuente</label>
-                      <div className="flex flex-wrap gap-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 min-h-[44px] max-h-32 overflow-y-auto">
-                        {sources.map(s => (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => toggleSource(s.id)}
-                            className={clsx(
-                              "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
-                              selectedSources.includes(s.id)
-                                ? "bg-primary text-white shadow-sm"
-                                : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-primary/50"
-                            )}
-                          >
-                            {s.name}
-                          </button>
-                        ))}
-                        {sources.length === 0 && <span className="text-xs text-slate-400">Sin fuentes disponibles</span>}
-                      </div>
-                    </div>
-
-                    {/* Categoría - Multi select chips */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-500">Categoria</label>
-                      <div className="flex flex-wrap gap-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 min-h-[44px] max-h-32 overflow-y-auto">
-                        {categories.map(c => (
-                          <button
-                            key={c.id}
-                            type="button"
-                            onClick={() => toggleCategory(c.id)}
-                            className={clsx(
-                              "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
-                              selectedCategories.includes(c.id)
-                                ? "bg-primary text-white shadow-sm"
-                                : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-primary/50"
-                            )}
-                          >
-                            {c.name}
-                          </button>
-                        ))}
-                        {categories.length === 0 && <span className="text-xs text-slate-400">Sin categorias disponibles</span>}
-                      </div>
+                      <label className="block text-xs font-bold text-slate-500">Categoría</label>
+                      <SearchableSelect
+                        options={categories.map(c => ({ value: c.id, label: c.name }))}
+                        value={selectedCategory}
+                        onChange={setSelectedCategory}
+                        placeholder="Todas las categorías..."
+                      />
                     </div>
 
                     {/* Tercero */}

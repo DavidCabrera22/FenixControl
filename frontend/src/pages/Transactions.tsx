@@ -29,6 +29,7 @@ export const Transactions = () => {
   const searchTerm = globalSearch;
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [allPartners, setAllPartners] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -43,15 +44,19 @@ export const Transactions = () => {
 
   const [filterAccount, setFilterAccount] = useState('Todas las cuentas');
   const [filterCategory, setFilterCategory] = useState('Todas las categorías');
-  const [filterPartner, setFilterPartner] = useState('Todos los socios');
+  const [filterPartner, setFilterPartner] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const fetchTransactions = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/transactions");
+      const [res, partnersRes] = await Promise.all([
+        axios.get("/transactions"),
+        axios.get("/partners"),
+      ]);
       setTransactions(res.data);
+      setAllPartners(partnersRes.data);
     } catch (err) {
       console.error("Error fetching transactions", err);
     } finally {
@@ -85,7 +90,7 @@ export const Transactions = () => {
 
     const matchesCategory = filterCategory === 'Todas las categorías' || tx.category?.name === filterCategory;
 
-    const matchesPartner = filterPartner === 'Todos los socios' || tx.partner?.name === filterPartner;
+    const matchesPartner = filterPartner === '' || tx.partner?.id === filterPartner;
 
     return matchesSearch && matchesDateFrom && matchesDateTo && matchesType && matchesAccount && matchesCategory && matchesPartner;
   });
@@ -102,7 +107,7 @@ export const Transactions = () => {
     setFilterType('Todos los tipos');
     setFilterAccount('Todas las cuentas');
     setFilterCategory('Todas las categorías');
-    setFilterPartner('Todos los socios');
+    setFilterPartner('');
     setCurrentPage(1);
   };
 
@@ -120,7 +125,6 @@ export const Transactions = () => {
 
   const uniqueCategories = Array.from(new Set(transactions.map(t => t.category?.name).filter(Boolean)));
   const uniqueAccounts = Array.from(new Set(transactions.map(t => t.type === 'INCOME' ? t.accountTo?.name : t.accountFrom?.name).filter(Boolean)));
-  const uniquePartners = Array.from(new Set(transactions.map(t => t.partner?.name).filter(Boolean))).sort();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -197,8 +201,8 @@ export const Transactions = () => {
           <div className="flex-1 min-w-[140px]">
              <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Socio</label>
              <select value={filterPartner} onChange={(e) => { setFilterPartner(e.target.value); setCurrentPage(1); }} className="w-full h-10 md:h-11 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 text-xs md:text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer">
-               <option>Todos los socios</option>
-               {uniquePartners.map(p => <option key={p} value={p}>{p}</option>)}
+               <option value="">Todos los socios</option>
+               {allPartners.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
              </select>
           </div>
           <div className="w-full md:w-auto flex items-center gap-2 md:pt-6">

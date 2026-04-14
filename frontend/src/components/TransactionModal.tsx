@@ -54,44 +54,52 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
 
     const loadData = async () => {
       try {
-        const [accountsRes, categoriesRes, sourcesRes, thirdPartiesRes, partnersRes] = await Promise.all([
+        const requests: Promise<any>[] = [
           axios.get('/accounts'),
           axios.get('/categories'),
           axios.get('/sources'),
           axios.get('/third-parties'),
           axios.get('/partners'),
-        ]);
+        ];
+        // Fetch full transaction detail from API to guarantee all fields
+        if (initialData?.id) {
+          requests.push(axios.get(`/transactions/${initialData.id}`));
+        }
+
+        const [accountsRes, categoriesRes, sourcesRes, thirdPartiesRes, partnersRes, txDetailRes] = await Promise.all(requests);
+
         setAccounts(accountsRes.data);
         setCategories(categoriesRes.data);
         setSources(sourcesRes.data);
         setThirdParties(thirdPartiesRes.data);
         setPartners(partnersRes.data);
 
-        if (initialData) {
-          setDate(initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
-          setAmount(initialData.amount ? String(initialData.amount) : '');
-          setAccountFrom(initialData.accountFrom?.id || initialData.accountFromId || initialData.accountTo?.id || initialData.accountToId || '');
+        if (initialData?.id && txDetailRes) {
+          const tx = txDetailRes.data;
+          setDate(tx.date ? new Date(tx.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+          setAmount(tx.amount ? String(tx.amount) : '');
+          setAccountFrom(tx.accountFrom?.id || tx.accountFromId || tx.accountTo?.id || tx.accountToId || '');
           setAccountTo('');
-          setCategory(initialData.category?.id || initialData.categoryId || '');
-          setPartnerId(initialData.partner?.id || initialData.partnerId || '');
-          setDescription(initialData.description || '');
-          setFileName(initialData.attachmentUrl ? initialData.attachmentUrl.split('/').pop() : '');
+          setCategory(tx.category?.id || tx.categoryId || '');
+          setPartnerId(tx.partner?.id || tx.partnerId || '');
+          setDescription(tx.description || '');
+          setFileName(tx.attachmentUrl ? tx.attachmentUrl.split('/').pop() : '');
           setIsTransfer(false);
 
           // Source: take from transactionSources array
-          const firstSource = initialData.transactionSources?.[0];
+          const firstSource = tx.transactionSources?.[0];
           setSourceId(firstSource?.source?.id || firstSource?.sourceId || '');
 
           // Third party: match by name since it's stored as a string
-          if (initialData.thirdPartyName) {
+          if (tx.thirdPartyName) {
             const matched = thirdPartiesRes.data.find(
-              (t: { id: string; name: string }) => t.name === initialData.thirdPartyName
+              (t: { id: string; name: string }) => t.name === tx.thirdPartyName
             );
             setThirdPartyId(matched?.id || '');
           } else {
             setThirdPartyId('');
           }
-        } else {
+        } else if (!initialData) {
           setDate(new Date().toISOString().split('T')[0]);
           setAmount('');
           setAccountFrom('');

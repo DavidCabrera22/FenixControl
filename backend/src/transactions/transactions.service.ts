@@ -111,6 +111,7 @@ export class TransactionsService {
         accountFrom: true,
         accountTo: true,
         category: true,
+        partner: true,
         transactionSources: {
           include: { source: { include: { partner: true } } },
         },

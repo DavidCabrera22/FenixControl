@@ -133,11 +133,25 @@ export class TransactionsService {
     if (dto.accountToId !== undefined) data.accountToId = dto.accountToId;
     if (dto.categoryId !== undefined) data.categoryId = dto.categoryId;
     if (dto.allocationId !== undefined) data.allocationId = dto.allocationId;
-    
+
     if (dto.description !== undefined) data.description = dto.description || null;
     if (dto.thirdPartyName !== undefined) data.thirdPartyName = dto.thirdPartyName || null;
     if (dto.attachmentUrl !== undefined) data.attachmentUrl = dto.attachmentUrl || null;
     if (dto.partnerId !== undefined) data.partnerId = dto.partnerId || null;
+
+    // Handle sources: delete old ones and create new ones
+    if (dto.sources !== undefined) {
+      await this.prisma.transactionSource.deleteMany({ where: { transactionId: id } });
+      if (dto.sources && dto.sources.length > 0) {
+        await this.prisma.transactionSource.createMany({
+          data: dto.sources.map((s) => ({
+            transactionId: id,
+            sourceId: s.sourceId,
+            amount: s.amount,
+          })),
+        });
+      }
+    }
 
     return this.prisma.transaction.update({
       where: { id },

@@ -142,6 +142,8 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
 
     try {
       setIsSubmitting(true);
+      const sourcesPayload = sourceId ? [{ sourceId, amount: Number(amount) }] : undefined;
+
       const base = {
         date,
         amount: Number(amount),
@@ -150,6 +152,7 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
         thirdPartyName: thirdPartyId ? thirdParties.find(t => t.id === thirdPartyId)?.name : undefined,
         partnerId: partnerId || undefined,
         attachmentUrl: fileName ? `https://dummy-bucket.s3.amazonaws.com/${fileName}` : undefined,
+        sources: sourcesPayload,
       };
 
       if (initialData?.id) {
@@ -158,8 +161,9 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
           : { ...base, type: 'EXPENSE', accountFromId: accountFrom, accountToId: undefined };
         await axios.patch(`/transactions/${initialData.id}`, payload);
       } else if (isTransfer) {
-        await axios.post('/transactions', { ...base, type: 'EXPENSE', accountFromId: accountFrom, description: description || 'Transferencia - Salida' });
-        await axios.post('/transactions', { ...base, type: 'INCOME', accountToId: accountTo, description: description || 'Transferencia - Entrada' });
+        const transferBase = { ...base, sources: undefined };
+        await axios.post('/transactions', { ...transferBase, type: 'EXPENSE', accountFromId: accountFrom, description: description || 'Transferencia - Salida' });
+        await axios.post('/transactions', { ...transferBase, type: 'INCOME', accountToId: accountTo, description: description || 'Transferencia - Entrada' });
       } else if (derivedType === 'INCOME') {
         await axios.post('/transactions', { ...base, type: 'INCOME', accountToId: accountFrom });
       } else {

@@ -356,7 +356,7 @@ export const Reports = () => {
         </div>
 
         <div className="flex flex-col gap-1.5">
-           <span className="text-[10px] font-bold text-slate-400 uppercase px-1">Socio</span>
+           <span className="text-[10px] font-bold text-slate-400 uppercase px-1">Sociedad</span>
            <select 
              value={selectedPartner}
              onChange={(e) => setSelectedPartner(e.target.value)}
@@ -440,7 +440,7 @@ export const Reports = () => {
           { id: 'general', label: 'General' },
           { id: 'fuente', label: 'Por Fuente' },
           { id: 'cuentas', label: 'Por Cuentas' },
-          { id: 'socio', label: 'Por Socio' },
+          { id: 'socio', label: 'Por Sociedad' },
           { id: 'categoria', label: 'Por Categoría' },
           { id: 'obligaciones', label: 'Obligaciones' },
         ].map(tab => (
@@ -646,7 +646,7 @@ export const Reports = () => {
         );
       })()}
 
-      {/* Tab Content: Por Socio */}
+      {/* Tab Content: Por Sociedad */}
       {activeTab === 'socio' && (() => {
         const byPartner: Record<string, { name: string; income: number; expense: number }> = {};
         partners.forEach(p => { byPartner[p.id] = { name: p.name, income: 0, expense: 0 }; });
@@ -663,11 +663,11 @@ export const Reports = () => {
         return (
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="font-bold text-slate-900 dark:text-white">Movimientos por Socio</h3>
+              <h3 className="font-bold text-slate-900 dark:text-white">Movimientos por Sociedad</h3>
             </div>
             <table className="w-full text-left">
               <thead><tr className="bg-slate-50 dark:bg-slate-800/50">
-                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Socio</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Sociedad</th>
                 <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Ingresos</th>
                 <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Gastos</th>
                 <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Neto</th>
@@ -758,7 +758,7 @@ export const Reports = () => {
             <table className="w-full text-left">
               <thead><tr className="bg-slate-50 dark:bg-slate-800/50">
                 <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Nombre</th>
-                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Socio</th>
+                <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Sociedad</th>
                 <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Inicial</th>
                 <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Pendiente</th>
                 <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500 text-right">Vencimiento</th>

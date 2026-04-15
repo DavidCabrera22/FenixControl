@@ -196,7 +196,7 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   }
   if (selectedCategory) activeFilters.push(`Categoría: ${categories.find(c => c.id === selectedCategory)?.name}`);
   if (selectedThirdParty) activeFilters.push(`Tercero: ${thirdParties.find(t => t.id === selectedThirdParty)?.name}`);
-  if (selectedPartner) activeFilters.push(`Socio: ${partners.find(p => p.id === selectedPartner)?.name}`);
+  if (selectedPartner) activeFilters.push(`Sociedad: ${partners.find(p => p.id === selectedPartner)?.name}`);
 
 
   return (
@@ -305,14 +305,14 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                       />
                     </div>
 
-                    {/* Socio */}
+                    {/* Sociedad */}
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-500">Socio</label>
+                      <label className="block text-xs font-bold text-slate-500">Sociedad</label>
                       <SearchableSelect
                         options={partners.map(p => ({ value: p.id, label: p.name }))}
                         value={selectedPartner}
                         onChange={setSelectedPartner}
-                        placeholder="Todos los socios..."
+                        placeholder="Todas las sociedades..."
                       />
                     </div>
                   </div>
@@ -441,7 +441,7 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                           <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Descripcion</th>
                           <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Fuente</th>
                           <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Categoria</th>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Socio</th>
+                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Sociedad</th>
                           <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Tercero</th>
                           <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-right" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Monto</th>
                         </tr>

@@ -58,7 +58,7 @@ export const SourceModal = ({ isOpen, onClose, onSaved, initialData }: SourceMod
       };
 
       if (!payload.partnerId) {
-         alert("Debes seleccionar un socio para esta fuente.");
+         alert("Debes seleccionar una sociedad para esta fuente.");
          setLoading(false);
          return;
       }
@@ -129,14 +129,14 @@ export const SourceModal = ({ isOpen, onClose, onSaved, initialData }: SourceMod
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Socio Propietario</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Sociedad Propietaria</label>
             <select 
               required
               value={formData.partnerId}
               onChange={e => setFormData({...formData, partnerId: e.target.value})}
               className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white"
             >
-              <option value="" disabled>Seleccionar socio...</option>
+              <option value="" disabled>Seleccionar sociedad...</option>
               {partners.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>

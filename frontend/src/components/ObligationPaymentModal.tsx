@@ -119,9 +119,9 @@ export const ObligationPaymentModal = ({ isOpen, onClose, onPaymentSuccess, obli
 
              <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Socio <span className="text-slate-400 font-normal">(opcional)</span>
+                  Sociedad <span className="text-slate-400 font-normal">(opcional)</span>
                 </label>
-                <SearchableSelect options={partnerOptions} value={partnerId} onChange={setPartnerId} placeholder="Buscar socio..." />
+                <SearchableSelect options={partnerOptions} value={partnerId} onChange={setPartnerId} placeholder="Buscar sociedad..." />
              </div>
           </div>
 

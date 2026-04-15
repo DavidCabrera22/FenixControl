@@ -49,7 +49,7 @@ export const PartnerModal = ({ isOpen, onClose, onSaved, initialData }: PartnerM
       onClose();
     } catch (err) {
       console.error("Error saving partner form", err);
-      alert("Hubo un error al guardar el socio.");
+      alert("Hubo un error al guardar la sociedad.");
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ export const PartnerModal = ({ isOpen, onClose, onSaved, initialData }: PartnerM
               <span className="material-symbols-outlined text-sm">{initialData ? 'edit' : 'groups'}</span>
             </div>
             <h3 className="font-bold text-lg text-slate-800 dark:text-white">
-              {initialData ? 'Editar Socio' : 'Nuevo Socio'}
+              {initialData ? 'Editar Sociedad' : 'Nueva Sociedad'}
             </h3>
           </div>
           <button 
@@ -80,7 +80,7 @@ export const PartnerModal = ({ isOpen, onClose, onSaved, initialData }: PartnerM
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nombre del Socio</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nombre de la Sociedad</label>
             <input 
               required
               type="text" 
@@ -120,7 +120,7 @@ export const PartnerModal = ({ isOpen, onClose, onSaved, initialData }: PartnerM
                 disabled={loading}
              >
                {loading ? <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span> : <span className="material-symbols-outlined text-sm">save</span>}
-               Guardar Socio
+               Guardar Sociedad
              </button>
           </div>
         </form>

@@ -40,8 +40,8 @@ interface Partner {
 
 export const Settings = () => {
   const { globalSearch } = useOutletContext<{ globalSearch: string }>();
-  // Active Tab: 'cuentas' | 'fuentes' | 'categorias' | 'socios'
-  const [activeTab, setActiveTab] = useState<'cuentas' | 'fuentes' | 'categorias' | 'socios' | 'terceros'>('cuentas');
+  // Active Tab: 'cuentas' | 'fuentes' | 'categorias' | 'sociedades'
+  const [activeTab, setActiveTab] = useState<'cuentas' | 'fuentes' | 'categorias' | 'sociedades' | 'terceros'>('cuentas');
 
   // Accounts Data
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -91,7 +91,7 @@ export const Settings = () => {
     if (activeTab === 'categorias') {
       fetchCategories();
     }
-    if (activeTab === 'socios') {
+    if (activeTab === 'sociedades') {
       fetchPartners();
     }
     if (activeTab === 'terceros') {
@@ -202,14 +202,14 @@ export const Settings = () => {
   };
 
   const handleDeletePartner = async (id: string) => {
-    if (!window.confirm("¿Estás seguro de eliminar este socio? Se perderán las referencias si hay transacciones o fuentes asociadas.")) return;
+    if (!window.confirm("¿Estás seguro de eliminar esta sociedad? Se perderán las referencias si hay transacciones o fuentes asociadas.")) return;
     try {
       await axios.delete(`/partners/${id}`);
       fetchPartners();
       fetchStats();
     } catch (err) {
       console.error("Error deleting partner", err);
-      alert("No se pudo eliminar el socio. Verifica que no tenga transacciones o fuentes asociadas.");
+      alert("No se pudo eliminar la sociedad. Verifica que no tenga transacciones o fuentes asociadas.");
     }
   };
 
@@ -314,10 +314,10 @@ export const Settings = () => {
           Categorías
         </button>
         <button
-           onClick={() => setActiveTab('socios')}
-           className={`pb-4 px-1 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'socios' ? 'border-primary text-primary dark:text-white' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+           onClick={() => setActiveTab('sociedades')}
+           className={`pb-4 px-1 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'sociedades' ? 'border-primary text-primary dark:text-white' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
         >
-          Socios
+          Sociedades
         </button>
         <button
            onClick={() => setActiveTab('terceros')}
@@ -432,7 +432,7 @@ export const Settings = () => {
                       <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Nombre de la Fuente</th>
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Tipo</th>
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Socio</th>
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Sociedad</th>
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Saldo Actual</th>
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right whitespace-nowrap">Acciones</th>
                       </tr>
@@ -553,19 +553,19 @@ export const Settings = () => {
               </div>
             </div>
          )}
-         {activeTab === 'socios' && (
+         {activeTab === 'sociedades' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Listado de Socios</h3>
-                  <p className="text-sm text-slate-500">Administra los socios de capital del sistema.</p>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Listado de Sociedades</h3>
+                  <p className="text-sm text-slate-500">Administra las sociedades de capital del sistema.</p>
                 </div>
                 <button 
                    onClick={() => { setEditingPartner(null); setShowPartnerModal(true); }}
                    className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   <span className="material-symbols-outlined text-lg">add</span>
-                  Nuevo Socio
+                  Nueva Sociedad
                 </button>
               </div>
 
@@ -574,7 +574,7 @@ export const Settings = () => {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Nombre del Socio</th>
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Nombre de la Sociedad</th>
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">Email / Contacto</th>
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right whitespace-nowrap">Acciones</th>
                       </tr>
@@ -582,11 +582,11 @@ export const Settings = () => {
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {isPartnersLoading ? (
                         <tr>
-                          <td colSpan={3} className="px-6 py-8 text-center text-slate-500">Cargando socios...</td>
+                          <td colSpan={3} className="px-6 py-8 text-center text-slate-500">Cargando sociedades...</td>
                         </tr>
                       ) : filteredPartners.length === 0 ? (
                         <tr>
-                          <td colSpan={3} className="px-6 py-8 text-center text-slate-500">No se encontraron socios con la búsqueda actual.</td>
+                          <td colSpan={3} className="px-6 py-8 text-center text-slate-500">No se encontraron sociedades con la búsqueda actual.</td>
                         </tr>
                       ) : (
                         filteredPartners.map(part => (
@@ -601,10 +601,10 @@ export const Settings = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => { setEditingPartner(part); setShowPartnerModal(true); }} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 transition-colors" title="Editar socio">
+                                <button onClick={() => { setEditingPartner(part); setShowPartnerModal(true); }} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 transition-colors" title="Editar sociedad">
                                   <span className="material-symbols-outlined text-lg">edit</span>
                                 </button>
-                                <button onClick={() => handleDeletePartner(part.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors" title="Eliminar socio">
+                                <button onClick={() => handleDeletePartner(part.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors" title="Eliminar sociedad">
                                   <span className="material-symbols-outlined text-lg">delete</span>
                                 </button>
                               </div>
@@ -741,12 +741,12 @@ export const Settings = () => {
         </div>
         <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-sm text-slate-500 uppercase tracking-widest">Socios</h4>
+            <h4 className="font-bold text-sm text-slate-500 uppercase tracking-widest">Sociedades</h4>
             <span className="material-symbols-outlined text-primary">groups</span>
           </div>
           <p className="text-2xl font-black text-primary dark:text-slate-100">{stats.partners}</p>
-          <p className="text-xs text-slate-400 italic">Socios de capital registrados</p>
-          <button onClick={() => setActiveTab('socios')} className="w-full text-center py-2 text-primary font-bold text-sm border-t border-slate-100 dark:border-slate-800 mt-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Gestionar socios</button>
+          <p className="text-xs text-slate-400 italic">Sociedades de capital registradas</p>
+          <button onClick={() => setActiveTab('sociedades')} className="w-full text-center py-2 text-primary font-bold text-sm border-t border-slate-100 dark:border-slate-800 mt-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Gestionar sociedades</button>
         </div>
       </div>
 

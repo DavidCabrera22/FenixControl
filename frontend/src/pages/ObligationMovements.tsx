@@ -62,7 +62,7 @@ export const ObligationMovements = () => {
     setIsViewModalOpen(true);
   };
 
-  // Lista única de socios para el filtro
+  // Lista única de sociedades para el filtro
   const uniquePartners = Array.from(
     new Set(movements.filter(tx => tx.partner?.name).map(tx => tx.partner!.name))
   ).sort();
@@ -122,7 +122,7 @@ export const ObligationMovements = () => {
             onChange={(e) => { setFilterPartner(e.target.value); setCurrentPage(1); }}
             className="appearance-none bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-primary/20 text-slate-700 dark:text-slate-300 transition-all outline-none cursor-pointer font-medium"
           >
-            <option value="">Todos los socios</option>
+            <option value="">Todas las sociedades</option>
             {uniquePartners.map((name) => (
               <option key={name} value={name}>{name}</option>
             ))}
@@ -139,7 +139,7 @@ export const ObligationMovements = () => {
               <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest w-32">Fecha</th>
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest">Descripción</th>
-                <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest">Socio</th>
+                <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest">Sociedad</th>
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest">Tercero</th>
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest text-right">Monto</th>
                 <th className="px-6 py-4 text-xs font-black text-primary dark:text-slate-400 uppercase tracking-widest text-right w-24">Acciones</th>

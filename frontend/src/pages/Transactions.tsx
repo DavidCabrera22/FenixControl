@@ -199,9 +199,9 @@ export const Transactions = () => {
              </select>
           </div>
           <div className="flex-1 min-w-[140px]">
-             <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Socio</label>
+             <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase mb-1.5 md:mb-2">Sociedad</label>
              <select value={filterPartner} onChange={(e) => { setFilterPartner(e.target.value); setCurrentPage(1); }} className="w-full h-10 md:h-11 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 text-xs md:text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer">
-               <option value="">Todos los socios</option>
+               <option value="">Todas las sociedades</option>
                {allPartners.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
              </select>
           </div>

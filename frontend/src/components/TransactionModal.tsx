@@ -290,10 +290,10 @@ export const TransactionModal = ({ isOpen, onClose, onSaved, initialData }: Tran
               <SearchableSelect options={categoryOptions} value={category} onChange={setCategory} placeholder="Buscar categoría..." />
             </div>
 
-            {/* Socio & Tercero */}
+            {/* Sociedad & Tercero */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Socio <span className="text-slate-400 font-normal">(opcional)</span></label>
-              <SearchableSelect options={partners.map(p => ({ value: p.id, label: p.name }))} value={partnerId} onChange={setPartnerId} placeholder="Buscar socio..." />
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Sociedad <span className="text-slate-400 font-normal">(opcional)</span></label>
+              <SearchableSelect options={partners.map(p => ({ value: p.id, label: p.name }))} value={partnerId} onChange={setPartnerId} placeholder="Buscar sociedad..." />
             </div>
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tercero <span className="text-slate-400 font-normal">(opcional)</span></label>

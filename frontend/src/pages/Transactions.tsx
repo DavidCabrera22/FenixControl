@@ -225,13 +225,14 @@ export const Transactions = () => {
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Tipo</th>
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Cuenta</th>
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Categoría</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Descripción</th>
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Monto</th>
                   <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {paginatedTransactions.length === 0 ? (
-                  <tr><td colSpan={6} className="p-8 text-center text-slate-500 font-medium">No se encontraron movimientos.</td></tr>
+                  <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No se encontraron movimientos.</td></tr>
                 ) : (
                   paginatedTransactions.map(tx => (
                     <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer">
@@ -261,6 +262,17 @@ export const Transactions = () => {
                       </td>
                       <td className="px-4 md:px-6 py-3 md:py-4">
                         <span className="text-xs md:text-sm text-slate-600 dark:text-slate-400">{tx.category?.name || 'General'}</span>
+                      </td>
+                      <td className="px-4 md:px-6 py-3 md:py-4 relative">
+                        <div className="group/desc relative">
+                          <span className="text-xs md:text-sm text-slate-600 dark:text-slate-400 line-clamp-1 cursor-default">{tx.description || '—'}</span>
+                          {tx.description && tx.description.length > 40 && (
+                            <div className="invisible group-hover/desc:visible opacity-0 group-hover/desc:opacity-100 transition-all duration-200 absolute z-50 left-0 top-full mt-1 max-w-xs w-max bg-slate-900 dark:bg-slate-700 text-white text-xs rounded-lg px-3 py-2 shadow-xl border border-slate-700 dark:border-slate-600">
+                              <div className="absolute -top-1 left-4 w-2 h-2 bg-slate-900 dark:bg-slate-700 rotate-45 border-l border-t border-slate-700 dark:border-slate-600"></div>
+                              {tx.description}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className={clsx("px-4 md:px-6 py-3 md:py-4 text-right font-bold text-xs md:text-sm whitespace-nowrap",
                         tx.type === 'INCOME' ? 'text-emerald-600 dark:text-emerald-400' : 

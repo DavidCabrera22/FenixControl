@@ -145,11 +145,13 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   const totalExpense = filteredData.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + Number(t.amount), 0);
   const totalNet = totalIncome - totalExpense;
 
-  // Summary grouped by Category -> Type (Income/Expense) -> Source
+  // Summary grouped by Category -> Type (Income/Expense) -> Source + ThirdParties
   const summaryByCategory: Record<string, {
     name: string;
     incomeSources: Record<string, number>;
     expenseSources: Record<string, number>;
+    incomeThirdParties: Record<string, number>;
+    expenseThirdParties: Record<string, number>;
     totalIncome: number;
     totalExpense: number;
   }> = {};
@@ -157,7 +159,7 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   filteredData.forEach(t => {
     const catName = t.category?.name ?? 'Sin categoría';
     if (!summaryByCategory[catName]) {
-      summaryByCategory[catName] = { name: catName, incomeSources: {}, expenseSources: {}, totalIncome: 0, totalExpense: 0 };
+      summaryByCategory[catName] = { name: catName, incomeSources: {}, expenseSources: {}, incomeThirdParties: {}, expenseThirdParties: {}, totalIncome: 0, totalExpense: 0 };
     }
     const cat = summaryByCategory[catName];
     const amount = Number(t.amount);
@@ -172,6 +174,9 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
       } else {
         cat.incomeSources['Sin fuente'] = (cat.incomeSources['Sin fuente'] || 0) + amount;
       }
+      if (t.thirdPartyName) {
+        cat.incomeThirdParties[t.thirdPartyName] = (cat.incomeThirdParties[t.thirdPartyName] || 0) + amount;
+      }
     } else if (t.type === 'EXPENSE') {
       cat.totalExpense += amount;
       if (t.transactionSources && t.transactionSources.length > 0) {
@@ -181,6 +186,9 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
         });
       } else {
         cat.expenseSources['Sin fuente'] = (cat.expenseSources['Sin fuente'] || 0) + amount;
+      }
+      if (t.thirdPartyName) {
+        cat.expenseThirdParties[t.thirdPartyName] = (cat.expenseThirdParties[t.thirdPartyName] || 0) + amount;
       }
     }
   });
@@ -544,6 +552,19 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                                         <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#15803d' }}>{formatCurrency(amount)}</td>
                                       </tr>
                                     ))}
+                                    {Object.keys(cat.incomeThirdParties).length > 0 && (
+                                      <>
+                                        <tr style={{ backgroundColor: '#f0fdf4' }}>
+                                          <td colSpan={2} className="px-5 py-1.5 pl-8 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#15803d', borderTop: '1px solid #bbf7d0' }}>Terceros</td>
+                                        </tr>
+                                        {Object.entries(cat.incomeThirdParties).sort((a, b) => b[1] - a[1]).map(([tpName, amount], i) => (
+                                          <tr key={tpName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                                            <td className="px-5 py-2 pl-12 text-xs font-medium" style={{ color: '#64748b' }}>{tpName}</td>
+                                            <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#15803d' }}>{formatCurrency(amount)}</td>
+                                          </tr>
+                                        ))}
+                                      </>
+                                    )}
                                     <tr style={{ backgroundColor: '#f0fdf4', borderTop: '1px solid #bbf7d0' }}>
                                       <td className="px-5 py-2 pl-8 text-xs font-black" style={{ color: '#15803d' }}>Subtotal Ingresos</td>
                                       <td className="px-5 py-2 text-xs font-black text-right" style={{ color: '#15803d' }}>{formatCurrency(cat.totalIncome)}</td>
@@ -567,6 +588,19 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                                         <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#dc2626' }}>{formatCurrency(amount)}</td>
                                       </tr>
                                     ))}
+                                    {Object.keys(cat.expenseThirdParties).length > 0 && (
+                                      <>
+                                        <tr style={{ backgroundColor: '#fff1f2' }}>
+                                          <td colSpan={2} className="px-5 py-1.5 pl-8 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#dc2626', borderTop: '1px solid #fecdd3' }}>Terceros</td>
+                                        </tr>
+                                        {Object.entries(cat.expenseThirdParties).sort((a, b) => b[1] - a[1]).map(([tpName, amount], i) => (
+                                          <tr key={tpName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                                            <td className="px-5 py-2 pl-12 text-xs font-medium" style={{ color: '#64748b' }}>{tpName}</td>
+                                            <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#dc2626' }}>{formatCurrency(amount)}</td>
+                                          </tr>
+                                        ))}
+                                      </>
+                                    )}
                                     <tr style={{ backgroundColor: '#fff1f2', borderTop: '1px solid #fecdd3' }}>
                                       <td className="px-5 py-2 pl-8 text-xs font-black" style={{ color: '#dc2626' }}>Subtotal Egresos</td>
                                       <td className="px-5 py-2 text-xs font-black text-right" style={{ color: '#dc2626' }}>{formatCurrency(cat.totalExpense)}</td>

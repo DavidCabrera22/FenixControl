@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { clsx } from 'clsx';
 import { formatCurrency } from '../lib/utils';
@@ -145,13 +145,12 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   const totalExpense = filteredData.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + Number(t.amount), 0);
   const totalNet = totalIncome - totalExpense;
 
-  // Summary grouped by Category -> Type (Income/Expense) -> Source + ThirdParties
+  // Summary grouped by Category -> Type (Income/Expense) -> Source -> ThirdParties
+  type SourceDetail = { total: number; thirdParties: Record<string, number> };
   const summaryByCategory: Record<string, {
     name: string;
-    incomeSources: Record<string, number>;
-    expenseSources: Record<string, number>;
-    incomeThirdParties: Record<string, number>;
-    expenseThirdParties: Record<string, number>;
+    incomeSources: Record<string, SourceDetail>;
+    expenseSources: Record<string, SourceDetail>;
     totalIncome: number;
     totalExpense: number;
   }> = {};
@@ -159,36 +158,37 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   filteredData.forEach(t => {
     const catName = t.category?.name ?? 'Sin categoría';
     if (!summaryByCategory[catName]) {
-      summaryByCategory[catName] = { name: catName, incomeSources: {}, expenseSources: {}, incomeThirdParties: {}, expenseThirdParties: {}, totalIncome: 0, totalExpense: 0 };
+      summaryByCategory[catName] = { name: catName, incomeSources: {}, expenseSources: {}, totalIncome: 0, totalExpense: 0 };
     }
     const cat = summaryByCategory[catName];
     const amount = Number(t.amount);
+    const tpName = t.thirdPartyName || '';
+
+    const addToSource = (sources: Record<string, SourceDetail>, sourceName: string, sourceAmount: number) => {
+      if (!sources[sourceName]) sources[sourceName] = { total: 0, thirdParties: {} };
+      sources[sourceName].total += sourceAmount;
+      if (tpName) {
+        sources[sourceName].thirdParties[tpName] = (sources[sourceName].thirdParties[tpName] || 0) + sourceAmount;
+      }
+    };
 
     if (t.type === 'INCOME') {
       cat.totalIncome += amount;
       if (t.transactionSources && t.transactionSources.length > 0) {
         t.transactionSources.forEach(ts => {
-          const sName = ts.source?.name ?? 'Sin fuente';
-          cat.incomeSources[sName] = (cat.incomeSources[sName] || 0) + Number(ts.amount);
+          addToSource(cat.incomeSources, ts.source?.name ?? 'Sin fuente', Number(ts.amount));
         });
       } else {
-        cat.incomeSources['Sin fuente'] = (cat.incomeSources['Sin fuente'] || 0) + amount;
-      }
-      if (t.thirdPartyName) {
-        cat.incomeThirdParties[t.thirdPartyName] = (cat.incomeThirdParties[t.thirdPartyName] || 0) + amount;
+        addToSource(cat.incomeSources, 'Sin fuente', amount);
       }
     } else if (t.type === 'EXPENSE') {
       cat.totalExpense += amount;
       if (t.transactionSources && t.transactionSources.length > 0) {
         t.transactionSources.forEach(ts => {
-          const sName = ts.source?.name ?? 'Sin fuente';
-          cat.expenseSources[sName] = (cat.expenseSources[sName] || 0) + Number(ts.amount);
+          addToSource(cat.expenseSources, ts.source?.name ?? 'Sin fuente', Number(ts.amount));
         });
       } else {
-        cat.expenseSources['Sin fuente'] = (cat.expenseSources['Sin fuente'] || 0) + amount;
-      }
-      if (t.thirdPartyName) {
-        cat.expenseThirdParties[t.thirdPartyName] = (cat.expenseThirdParties[t.thirdPartyName] || 0) + amount;
+        addToSource(cat.expenseSources, 'Sin fuente', amount);
       }
     }
   });
@@ -546,25 +546,20 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                                 </div>
                                 <table className="w-full" style={{ borderCollapse: 'collapse' }}>
                                   <tbody>
-                                    {Object.entries(cat.incomeSources).sort((a, b) => b[1] - a[1]).map(([sourceName, amount], i) => (
-                                      <tr key={sourceName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                                        <td className="px-5 py-2 pl-8 text-xs font-medium" style={{ color: '#334155' }}>{sourceName}</td>
-                                        <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#15803d' }}>{formatCurrency(amount)}</td>
-                                      </tr>
-                                    ))}
-                                    {Object.keys(cat.incomeThirdParties).length > 0 && (
-                                      <>
-                                        <tr style={{ backgroundColor: '#f0fdf4' }}>
-                                          <td colSpan={2} className="px-5 py-1.5 pl-8 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#15803d', borderTop: '1px solid #bbf7d0' }}>Terceros</td>
+                                    {Object.entries(cat.incomeSources).sort((a, b) => b[1].total - a[1].total).map(([sourceName, sourceDetail], i) => (
+                                      <React.Fragment key={sourceName}>
+                                        <tr style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: Object.keys(sourceDetail.thirdParties).length > 0 ? 'none' : '1px solid #f1f5f9' }}>
+                                          <td className="px-5 py-2 pl-8 text-xs font-medium" style={{ color: '#334155' }}>{sourceName}</td>
+                                          <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#15803d' }}>{formatCurrency(sourceDetail.total)}</td>
                                         </tr>
-                                        {Object.entries(cat.incomeThirdParties).sort((a, b) => b[1] - a[1]).map(([tpName, amount], i) => (
+                                        {Object.entries(sourceDetail.thirdParties).sort((a, b) => b[1] - a[1]).map(([tpName, tpAmount]) => (
                                           <tr key={tpName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                                            <td className="px-5 py-2 pl-12 text-xs font-medium" style={{ color: '#64748b' }}>{tpName}</td>
-                                            <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#15803d' }}>{formatCurrency(amount)}</td>
+                                            <td className="px-5 py-1.5 pl-12 text-[11px]" style={{ color: '#94a3b8' }}>↳ {tpName}</td>
+                                            <td className="px-5 py-1.5 text-[11px] text-right" style={{ color: '#86efac' }}>{formatCurrency(tpAmount)}</td>
                                           </tr>
                                         ))}
-                                      </>
-                                    )}
+                                      </React.Fragment>
+                                    ))}
                                     <tr style={{ backgroundColor: '#f0fdf4', borderTop: '1px solid #bbf7d0' }}>
                                       <td className="px-5 py-2 pl-8 text-xs font-black" style={{ color: '#15803d' }}>Subtotal Ingresos</td>
                                       <td className="px-5 py-2 text-xs font-black text-right" style={{ color: '#15803d' }}>{formatCurrency(cat.totalIncome)}</td>
@@ -582,25 +577,20 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                                 </div>
                                 <table className="w-full" style={{ borderCollapse: 'collapse' }}>
                                   <tbody>
-                                    {Object.entries(cat.expenseSources).sort((a, b) => b[1] - a[1]).map(([sourceName, amount], i) => (
-                                      <tr key={sourceName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                                        <td className="px-5 py-2 pl-8 text-xs font-medium" style={{ color: '#334155' }}>{sourceName}</td>
-                                        <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#dc2626' }}>{formatCurrency(amount)}</td>
-                                      </tr>
-                                    ))}
-                                    {Object.keys(cat.expenseThirdParties).length > 0 && (
-                                      <>
-                                        <tr style={{ backgroundColor: '#fff1f2' }}>
-                                          <td colSpan={2} className="px-5 py-1.5 pl-8 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#dc2626', borderTop: '1px solid #fecdd3' }}>Terceros</td>
+                                    {Object.entries(cat.expenseSources).sort((a, b) => b[1].total - a[1].total).map(([sourceName, sourceDetail], i) => (
+                                      <React.Fragment key={sourceName}>
+                                        <tr style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: Object.keys(sourceDetail.thirdParties).length > 0 ? 'none' : '1px solid #f1f5f9' }}>
+                                          <td className="px-5 py-2 pl-8 text-xs font-medium" style={{ color: '#334155' }}>{sourceName}</td>
+                                          <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#dc2626' }}>{formatCurrency(sourceDetail.total)}</td>
                                         </tr>
-                                        {Object.entries(cat.expenseThirdParties).sort((a, b) => b[1] - a[1]).map(([tpName, amount], i) => (
+                                        {Object.entries(sourceDetail.thirdParties).sort((a, b) => b[1] - a[1]).map(([tpName, tpAmount]) => (
                                           <tr key={tpName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                                            <td className="px-5 py-2 pl-12 text-xs font-medium" style={{ color: '#64748b' }}>{tpName}</td>
-                                            <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#dc2626' }}>{formatCurrency(amount)}</td>
+                                            <td className="px-5 py-1.5 pl-12 text-[11px]" style={{ color: '#94a3b8' }}>↳ {tpName}</td>
+                                            <td className="px-5 py-1.5 text-[11px] text-right" style={{ color: '#fca5a5' }}>{formatCurrency(tpAmount)}</td>
                                           </tr>
                                         ))}
-                                      </>
-                                    )}
+                                      </React.Fragment>
+                                    ))}
                                     <tr style={{ backgroundColor: '#fff1f2', borderTop: '1px solid #fecdd3' }}>
                                       <td className="px-5 py-2 pl-8 text-xs font-black" style={{ color: '#dc2626' }}>Subtotal Egresos</td>
                                       <td className="px-5 py-2 text-xs font-black text-right" style={{ color: '#dc2626' }}>{formatCurrency(cat.totalExpense)}</td>

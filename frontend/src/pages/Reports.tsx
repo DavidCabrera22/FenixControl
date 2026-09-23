@@ -13,7 +13,7 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
 
 interface Transaction {

@@ -1,24 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { clsx } from 'clsx';
-import { formatCurrency } from '../lib/utils';
 import { SearchableSelect } from './SearchableSelect';
-import html2canvas from 'html2canvas-pro';
-import { jsPDF } from 'jspdf';
-
-interface Transaction {
-  id: string;
-  type: string;
-  amount: string | number;
-  description?: string;
-  thirdPartyName?: string;
-  date: string;
-  accountFrom?: { id: string; name: string };
-  accountTo?: { id: string; name: string };
-  category?: { id: string; name: string };
-  partner?: { id: string; name: string };
-  transactionSources?: { sourceId: string; amount: string | number; source: { id: string; name: string } }[];
-}
+import { createTransactionReport, type ReportTransaction } from '../lib/transactionReport';
 
 interface TransactionReportModalProps {
   isOpen: boolean;
@@ -45,27 +29,46 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   const [partners, setPartners] = useState<{ id: string; name: string }[]>([]);
 
   // Report data
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
-  const [filteredData, setFilteredData] = useState<Transaction[]>([]);
+  const [allTransactions, setAllTransactions] = useState<ReportTransaction[]>([]);
+  const [filteredData, setFilteredData] = useState<ReportTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const reportRef = useRef<HTMLDivElement>(null);
+  const [reportUrl, setReportUrl] = useState('');
+  const [reportError, setReportError] = useState('');
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  useEffect(() => {
+    return () => { if (reportUrl) URL.revokeObjectURL(reportUrl); };
+  }, [reportUrl]);
 
   useEffect(() => {
     if (isOpen) {
       setStep('filters');
+      setIsLoading(true);
+      setReportError('');
+      setLoadFailed(false);
+      let cancelled = false;
       Promise.all([
         axios.get('/categories'),
         axios.get('/third-parties'),
         axios.get('/partners'),
         axios.get('/transactions'),
       ]).then(([catRes, tpRes, pRes, txRes]) => {
+        if (cancelled) return;
         setCategories(catRes.data);
         setThirdParties(tpRes.data);
         setPartners(pRes.data);
         setAllTransactions(txRes.data);
-      }).catch(console.error);
+      }).catch(() => {
+        if (!cancelled) {
+          setLoadFailed(true);
+          setReportError('No se pudieron cargar los movimientos. Cierra el reporte e inténtalo de nuevo.');
+        }
+      }).finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+      return () => { cancelled = true; };
     } else {
       setDateFrom('');
       setDateTo('');
@@ -74,10 +77,13 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
       setSelectedPartner('');
       setReportType('detailed');
       setFilteredData([]);
+      setReportUrl('');
     }
   }, [isOpen]);
 
   const handleGenerate = () => {
+    if (dateFrom && dateTo && dateFrom > dateTo) return;
+    setReportError('');
     setIsLoading(true);
     let result = [...allTransactions];
 
@@ -95,44 +101,30 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
     }
 
     result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setFilteredData(result);
-    setStep('preview');
-    setIsLoading(false);
+    try {
+      const pdf = createTransactionReport({ transactions: result, type: reportType, filters: activeFilters });
+      setReportUrl(URL.createObjectURL(pdf.output('blob')));
+      setFilteredData(result);
+      setStep('preview');
+    } catch (error) {
+      console.error('Error generating report', error);
+      setReportError('No se pudo generar el reporte. Inténtalo de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleExportPDF = async () => {
-    if (!reportRef.current) return;
+  const handleExportPDF = () => {
+    if (!reportUrl) return;
     setIsExporting(true);
     try {
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
-      if (pdfHeight <= pageHeight) {
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      } else {
-        let position = 0;
-        let remaining = pdfHeight;
-        while (remaining > 0) {
-          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-          remaining -= pageHeight;
-          position -= pageHeight;
-          if (remaining > 0) pdf.addPage();
-        }
-      }
-
-      const dateSuffix = new Date().toISOString().split('T')[0];
-      pdf.save(`Reporte_Movimientos_${dateSuffix}.pdf`);
-    } catch (err) {
-      console.error('Error generating PDF', err);
-      alert('Hubo un error generando el PDF.');
+      const link = document.createElement('a');
+      link.href = reportUrl;
+      const period = [dateFrom, dateTo].filter(Boolean).join('_al_') || new Date().toISOString().slice(0, 10);
+      link.download = `Fenix_Movimientos_${reportType === 'detailed' ? 'Detallado' : 'Resumido'}_${period}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } finally {
       setIsExporting(false);
     }
@@ -140,66 +132,11 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
 
   if (!isOpen) return null;
 
-  // Compute summary data
-  const totalIncome = filteredData.filter(t => t.type === 'INCOME').reduce((s, t) => s + Number(t.amount), 0);
-  const totalExpense = filteredData.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + Number(t.amount), 0);
-  const totalNet = totalIncome - totalExpense;
-
-  // Summary grouped by Category -> Type (Income/Expense) -> Source -> ThirdParties
-  type SourceDetail = { total: number; thirdParties: Record<string, number> };
-  const summaryByCategory: Record<string, {
-    name: string;
-    incomeSources: Record<string, SourceDetail>;
-    expenseSources: Record<string, SourceDetail>;
-    totalIncome: number;
-    totalExpense: number;
-  }> = {};
-
-  filteredData.forEach(t => {
-    const catName = t.category?.name ?? 'Sin categoría';
-    if (!summaryByCategory[catName]) {
-      summaryByCategory[catName] = { name: catName, incomeSources: {}, expenseSources: {}, totalIncome: 0, totalExpense: 0 };
-    }
-    const cat = summaryByCategory[catName];
-    const amount = Number(t.amount);
-    const tpName = t.thirdPartyName || '';
-
-    const addToSource = (sources: Record<string, SourceDetail>, sourceName: string, sourceAmount: number) => {
-      if (!sources[sourceName]) sources[sourceName] = { total: 0, thirdParties: {} };
-      sources[sourceName].total += sourceAmount;
-      if (tpName) {
-        sources[sourceName].thirdParties[tpName] = (sources[sourceName].thirdParties[tpName] || 0) + sourceAmount;
-      }
-    };
-
-    if (t.type === 'INCOME') {
-      cat.totalIncome += amount;
-      if (t.transactionSources && t.transactionSources.length > 0) {
-        t.transactionSources.forEach(ts => {
-          addToSource(cat.incomeSources, ts.source?.name ?? 'Sin fuente', Number(ts.amount));
-        });
-      } else {
-        addToSource(cat.incomeSources, 'Sin fuente', amount);
-      }
-    } else if (t.type === 'EXPENSE') {
-      cat.totalExpense += amount;
-      if (t.transactionSources && t.transactionSources.length > 0) {
-        t.transactionSources.forEach(ts => {
-          addToSource(cat.expenseSources, ts.source?.name ?? 'Sin fuente', Number(ts.amount));
-        });
-      } else {
-        addToSource(cat.expenseSources, 'Sin fuente', amount);
-      }
-    }
-  });
-
-  const summaryCategories = Object.values(summaryByCategory).sort((a, b) => (b.totalIncome + b.totalExpense) - (a.totalIncome + a.totalExpense));
-
   // Active filter labels
   const activeFilters: string[] = [];
   if (dateFrom || dateTo) {
     const from = dateFrom ? new Date(dateFrom + 'T00:00:00Z').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'Inicio';
-    const to = dateTo ? new Date(dateTo + 'T00:00:00Z').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'Hoy';
+    const to = dateTo ? new Date(dateTo + 'T00:00:00Z').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'Sin fecha final';
     activeFilters.push(`${from} — ${to}`);
   }
   if (selectedCategory) activeFilters.push(`Categoría: ${categories.find(c => c.id === selectedCategory)?.name}`);
@@ -211,12 +148,12 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/50 dark:bg-background-dark/80 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative w-full max-w-5xl max-h-[92vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+      <div className={`relative w-full ${step === 'preview' ? 'max-w-7xl' : 'max-w-5xl'} max-h-[92vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200`}>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4 shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-6 py-4 shrink-0">
           <div className="flex items-center gap-3">
             {step === 'preview' && (
-              <button onClick={() => setStep('filters')} className="p-1.5 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+              <button aria-label="Volver a los filtros" onClick={() => setStep('filters')} className="p-1.5 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                 <span className="material-symbols-outlined text-xl">arrow_back</span>
               </button>
             )}
@@ -238,7 +175,7 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                 {isExporting ? 'Exportando...' : 'Descargar PDF'}
               </button>
             )}
-            <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+            <button aria-label="Cerrar reporte" onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
           </div>
@@ -365,11 +302,14 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                       )}
                       <span className="material-symbols-outlined text-2xl mb-2 block text-primary">summarize</span>
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Resumido</p>
-                      <p className="text-xs text-slate-500 mt-1">Muestra las fuentes con el valor total consolidado por fuente</p>
+                      <p className="text-xs text-slate-500 mt-1">Agrupa ingresos y gastos por categoría, fuente y tercero</p>
                     </button>
                   </div>
                 </div>
               </div>
+
+              {reportError && <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">{reportError}</p>}
+              {dateFrom && dateTo && dateFrom > dateTo && <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">La fecha inicial debe ser anterior o igual a la fecha final.</p>}
 
               {/* Actions */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
@@ -379,258 +319,40 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  disabled={isLoading}
+                  disabled={isLoading || loadFailed || !!(dateFrom && dateTo && dateFrom > dateTo)}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-70"
                 >
                   <span className="material-symbols-outlined text-lg">play_arrow</span>
-                  {isLoading ? 'Generando...' : 'Generar Reporte'}
+                  {isLoading ? 'Cargando movimientos...' : 'Generar Reporte'}
                 </button>
               </div>
             </div>
           )}
 
           {step === 'preview' && (
-            <div className="p-6">
-              {/* Printable Report Area */}
-              <div ref={reportRef} className="bg-white rounded-xl p-8 space-y-6" style={{ color: '#0f172a' }}>
-                {/* Report Header */}
-                <div className="text-center border-b-2 border-slate-800 pb-6">
-                  <h1 className="text-2xl font-black tracking-tight" style={{ color: '#0f172a' }}>Fenix Control</h1>
-                  <p className="text-sm font-medium mt-1" style={{ color: '#64748b' }}>
-                    Reporte de Movimientos {reportType === 'detailed' ? '— Detallado' : '— Resumido'}
+            <div className="bg-slate-100 dark:bg-slate-950 p-3 sm:p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    {reportType === 'detailed' ? 'Detalle de movimientos' : 'Resumen por categoría y fuente'}
                   </p>
-                  <p className="text-xs mt-2" style={{ color: '#94a3b8' }}>
-                    Generado el {new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
-                  </p>
-                  {activeFilters.length > 0 && (
-                    <div className="flex flex-wrap justify-center gap-2 mt-3">
-                      {activeFilters.map((f, i) => (
-                        <span key={i} className="px-2.5 py-1 rounded-full text-[10px] font-bold" style={{ backgroundColor: '#f1f5f9', color: '#475569' }}>
-                          {f}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {activeFilters.length === 0 && (
-                    <p className="text-xs mt-2" style={{ color: '#94a3b8' }}>Sin filtros aplicados — Todos los movimientos</p>
-                  )}
-                </div>
-
-                {/* KPI Cards */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl" style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#16a34a' }}>Total Ingresos</p>
-                    <p className="text-xl font-black mt-1" style={{ color: '#15803d' }}>{formatCurrency(totalIncome)}</p>
-                  </div>
-                  <div className="p-4 rounded-xl" style={{ backgroundColor: '#fff1f2', border: '1px solid #fecdd3' }}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#dc2626' }}>Total Gastos</p>
-                    <p className="text-xl font-black mt-1" style={{ color: '#dc2626' }}>{formatCurrency(totalExpense)}</p>
-                  </div>
-                  <div className="p-4 rounded-xl" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569' }}>Balance Neto</p>
-                    <p className="text-xl font-black mt-1" style={{ color: totalNet >= 0 ? '#15803d' : '#dc2626' }}>{formatCurrency(totalNet)}</p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-xs font-medium" style={{ color: '#94a3b8' }}>
-                    Total movimientos: <span className="font-bold" style={{ color: '#0f172a' }}>{filteredData.length}</span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    {filteredData.length} movimientos · {reportType === 'detailed' ? 'A4 horizontal' : 'A4 vertical'} · Valores en COP
                   </p>
                 </div>
-
-                {/* Detailed Table */}
-                {reportType === 'detailed' && (
-                  <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #e2e8f0' }}>
-                    <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ backgroundColor: '#f8fafc' }}>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Fecha</th>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Tipo</th>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Descripcion</th>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Fuente</th>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Categoria</th>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Sociedad</th>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Tercero</th>
-                          <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-right" style={{ color: '#64748b', borderBottom: '2px solid #e2e8f0' }}>Monto</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredData.length === 0 ? (
-                          <tr>
-                            <td colSpan={8} className="px-4 py-12 text-center text-sm" style={{ color: '#94a3b8' }}>
-                              No se encontraron movimientos con los filtros seleccionados
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredData.map((tx, i) => (
-                            <tr key={tx.id} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                              <td className="px-4 py-2.5 text-xs font-medium" style={{ color: '#334155' }}>
-                                {new Date(tx.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })}
-                              </td>
-                              <td className="px-4 py-2.5">
-                                <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded" style={{
-                                  backgroundColor: tx.type === 'INCOME' ? '#dcfce7' : tx.type === 'EXPENSE' ? '#ffe4e6' : '#e0e7ff',
-                                  color: tx.type === 'INCOME' ? '#15803d' : tx.type === 'EXPENSE' ? '#dc2626' : '#4338ca',
-                                }}>
-                                  {tx.type === 'INCOME' ? 'Ingreso' : tx.type === 'EXPENSE' ? 'Gasto' : 'Transf.'}
-                                </span>
-                              </td>
-                              <td className="px-4 py-2.5 text-xs font-medium max-w-[150px] truncate" style={{ color: '#334155' }} title={tx.description}>
-                                {tx.description || '—'}
-                              </td>
-                              <td className="px-4 py-2.5 text-xs" style={{ color: '#64748b' }}>
-                                {tx.transactionSources?.map(ts => ts.source?.name).filter(Boolean).join(', ') || '—'}
-                              </td>
-                              <td className="px-4 py-2.5 text-xs" style={{ color: '#64748b' }}>
-                                {tx.category?.name || '—'}
-                              </td>
-                              <td className="px-4 py-2.5 text-xs" style={{ color: '#64748b' }}>
-                                {tx.partner?.name || '—'}
-                              </td>
-                              <td className="px-4 py-2.5 text-xs" style={{ color: '#64748b' }}>
-                                {tx.thirdPartyName || '—'}
-                              </td>
-                              <td className="px-4 py-2.5 text-xs font-bold text-right" style={{
-                                color: tx.type === 'INCOME' ? '#15803d' : tx.type === 'EXPENSE' ? '#dc2626' : '#0f172a'
-                              }}>
-                                {tx.type === 'EXPENSE' ? '-' : ''}{formatCurrency(Number(tx.amount))}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                      {filteredData.length > 0 && (
-                        <tfoot>
-                          <tr style={{ backgroundColor: '#f1f5f9', borderTop: '2px solid #cbd5e1' }}>
-                            <td colSpan={7} className="px-4 py-3 text-xs font-black uppercase tracking-wider" style={{ color: '#334155' }}>
-                              Totales
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <div className="text-xs font-bold" style={{ color: '#15803d' }}>+{formatCurrency(totalIncome)}</div>
-                              <div className="text-xs font-bold" style={{ color: '#dc2626' }}>-{formatCurrency(totalExpense)}</div>
-                              <div className="text-sm font-black mt-1 pt-1" style={{ color: totalNet >= 0 ? '#15803d' : '#dc2626', borderTop: '1px solid #cbd5e1' }}>
-                                {formatCurrency(totalNet)}
-                              </div>
-                            </td>
-                          </tr>
-                        </tfoot>
-                      )}
-                    </table>
-                  </div>
-                )}
-
-                {/* Summary: Grouped by Category -> Type -> Sources */}
-                {reportType === 'summary' && (
-                  <div className="space-y-5">
-                    {summaryCategories.length === 0 ? (
-                      <div className="rounded-xl p-12 text-center text-sm" style={{ border: '1px solid #e2e8f0', color: '#94a3b8' }}>
-                        No se encontraron movimientos con los filtros seleccionados
-                      </div>
-                    ) : (
-                      <>
-                        {summaryCategories.map(cat => (
-                          <div key={cat.name} className="rounded-xl overflow-hidden" style={{ border: '1px solid #e2e8f0' }}>
-                            {/* Category Header */}
-                            <div className="px-5 py-3 flex items-center justify-between" style={{ backgroundColor: '#1e293b' }}>
-                              <span className="text-sm font-black text-white uppercase tracking-wider">{cat.name}</span>
-                              <span className="text-xs font-bold" style={{ color: cat.totalIncome - cat.totalExpense >= 0 ? '#86efac' : '#fca5a5' }}>
-                                Neto: {formatCurrency(cat.totalIncome - cat.totalExpense)}
-                              </span>
-                            </div>
-
-                            {/* Ingresos */}
-                            {Object.keys(cat.incomeSources).length > 0 && (
-                              <>
-                                <div className="px-5 py-2 flex items-center gap-2" style={{ backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0' }}>
-                                  <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#15803d' }}>Ingresos</span>
-                                </div>
-                                <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-                                  <tbody>
-                                    {Object.entries(cat.incomeSources).sort((a, b) => b[1].total - a[1].total).map(([sourceName, sourceDetail], i) => (
-                                      <React.Fragment key={sourceName}>
-                                        <tr style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: Object.keys(sourceDetail.thirdParties).length > 0 ? 'none' : '1px solid #f1f5f9' }}>
-                                          <td className="px-5 py-2 pl-8 text-xs font-medium" style={{ color: '#334155' }}>{sourceName}</td>
-                                          <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#15803d' }}>{formatCurrency(sourceDetail.total)}</td>
-                                        </tr>
-                                        {Object.entries(sourceDetail.thirdParties).sort((a, b) => b[1] - a[1]).map(([tpName, tpAmount]) => (
-                                          <tr key={tpName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                                            <td className="px-5 py-1.5 pl-12 text-[11px]" style={{ color: '#94a3b8' }}>↳ {tpName}</td>
-                                            <td className="px-5 py-1.5 text-[11px] text-right" style={{ color: '#86efac' }}>{formatCurrency(tpAmount)}</td>
-                                          </tr>
-                                        ))}
-                                      </React.Fragment>
-                                    ))}
-                                    <tr style={{ backgroundColor: '#f0fdf4', borderTop: '1px solid #bbf7d0' }}>
-                                      <td className="px-5 py-2 pl-8 text-xs font-black" style={{ color: '#15803d' }}>Subtotal Ingresos</td>
-                                      <td className="px-5 py-2 text-xs font-black text-right" style={{ color: '#15803d' }}>{formatCurrency(cat.totalIncome)}</td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </>
-                            )}
-
-                            {/* Egresos */}
-                            {Object.keys(cat.expenseSources).length > 0 && (
-                              <>
-                                <div className="px-5 py-2 flex items-center gap-2" style={{ backgroundColor: '#fff1f2', borderBottom: '1px solid #fecdd3' }}>
-                                  <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#dc2626' }}>Egresos</span>
-                                </div>
-                                <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-                                  <tbody>
-                                    {Object.entries(cat.expenseSources).sort((a, b) => b[1].total - a[1].total).map(([sourceName, sourceDetail], i) => (
-                                      <React.Fragment key={sourceName}>
-                                        <tr style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: Object.keys(sourceDetail.thirdParties).length > 0 ? 'none' : '1px solid #f1f5f9' }}>
-                                          <td className="px-5 py-2 pl-8 text-xs font-medium" style={{ color: '#334155' }}>{sourceName}</td>
-                                          <td className="px-5 py-2 text-xs font-bold text-right" style={{ color: '#dc2626' }}>{formatCurrency(sourceDetail.total)}</td>
-                                        </tr>
-                                        {Object.entries(sourceDetail.thirdParties).sort((a, b) => b[1] - a[1]).map(([tpName, tpAmount]) => (
-                                          <tr key={tpName} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                                            <td className="px-5 py-1.5 pl-12 text-[11px]" style={{ color: '#94a3b8' }}>↳ {tpName}</td>
-                                            <td className="px-5 py-1.5 text-[11px] text-right" style={{ color: '#fca5a5' }}>{formatCurrency(tpAmount)}</td>
-                                          </tr>
-                                        ))}
-                                      </React.Fragment>
-                                    ))}
-                                    <tr style={{ backgroundColor: '#fff1f2', borderTop: '1px solid #fecdd3' }}>
-                                      <td className="px-5 py-2 pl-8 text-xs font-black" style={{ color: '#dc2626' }}>Subtotal Egresos</td>
-                                      <td className="px-5 py-2 text-xs font-black text-right" style={{ color: '#dc2626' }}>{formatCurrency(cat.totalExpense)}</td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </>
-                            )}
-                          </div>
-                        ))}
-
-                        {/* Grand Total */}
-                        <div className="rounded-xl overflow-hidden" style={{ border: '2px solid #cbd5e1' }}>
-                          <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-                            <tbody>
-                              <tr style={{ backgroundColor: '#f1f5f9' }}>
-                                <td className="px-5 py-3 text-sm font-black uppercase" style={{ color: '#334155' }}>Total General</td>
-                                <td className="px-5 py-3 text-right">
-                                  <div className="text-xs font-bold" style={{ color: '#15803d' }}>Ingresos: {formatCurrency(totalIncome)}</div>
-                                  <div className="text-xs font-bold" style={{ color: '#dc2626' }}>Egresos: {formatCurrency(totalExpense)}</div>
-                                  <div className="text-sm font-black mt-1 pt-1" style={{ color: totalNet >= 0 ? '#15803d' : '#dc2626', borderTop: '1px solid #cbd5e1' }}>
-                                    Neto: {formatCurrency(totalNet)}
-                                  </div>
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {/* Footer */}
-                <div className="pt-4 text-center" style={{ borderTop: '1px solid #e2e8f0' }}>
-                  <p className="text-[10px]" style={{ color: '#94a3b8' }}>
-                    Fenix Control — Reporte generado automaticamente. Este documento es informativo.
-                  </p>
-                </div>
+                <a href={reportUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-teal-300 hover:underline">
+                  Abrir en otra pestaña
+                  <span className="material-symbols-outlined text-base">open_in_new</span>
+                </a>
               </div>
+              <iframe
+                src={`${reportUrl}#toolbar=1&navpanes=0&view=FitH`}
+                title="Vista previa del reporte de movimientos en PDF"
+                className="w-full h-[65vh] min-h-[360px] rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700"
+              />
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                Esta vista muestra el PDF que se descargará. Si tu navegador no muestra la vista previa, abre el reporte en otra pestaña o descárgalo.
+              </p>
             </div>
           )}
         </div>

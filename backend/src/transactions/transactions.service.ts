@@ -1,4 +1,5 @@
 ﻿import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -124,7 +125,7 @@ export class TransactionsService {
   }
 
   async update(id: string, dto: UpdateTransactionDto) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
     const data: Record<string, unknown> = {};
     if (dto.date) data.date = new Date(dto.date);
     if (dto.type) data.type = dto.type;
@@ -139,31 +140,103 @@ export class TransactionsService {
     if (dto.attachmentUrl !== undefined) data.attachmentUrl = dto.attachmentUrl || null;
     if (dto.partnerId !== undefined) data.partnerId = dto.partnerId || null;
 
-    // Handle sources: delete old ones and create new ones
-    if (dto.sources !== undefined) {
-      await this.prisma.transactionSource.deleteMany({ where: { transactionId: id } });
-      if (dto.sources && dto.sources.length > 0) {
-        await this.prisma.transactionSource.createMany({
-          data: dto.sources.map((s) => ({
-            transactionId: id,
-            sourceId: s.sourceId,
-            amount: s.amount,
-          })),
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Revert the balance effects of the transaction as it was
+      await this.applyBalanceEffects(tx, existing, -1);
+
+      // 2. Handle sources: delete old ones and create new ones
+      if (dto.sources !== undefined) {
+        await tx.transactionSource.deleteMany({ where: { transactionId: id } });
+        if (dto.sources && dto.sources.length > 0) {
+          await tx.transactionSource.createMany({
+            data: dto.sources.map((s) => ({
+              transactionId: id,
+              sourceId: s.sourceId,
+              amount: s.amount,
+            })),
+          });
+        }
+      }
+
+      const updated = await tx.transaction.update({
+        where: { id },
+        data,
+        include: {
+          accountFrom: true,
+          accountTo: true,
+          category: true,
+          partner: true,
+          transactionSources: { include: { source: true } },
+        },
+      });
+
+      // 3. Apply the balance effects of the edited transaction
+      await this.applyBalanceEffects(tx, updated, 1);
+
+      return updated;
+    });
+  }
+
+  /**
+   * Applies (direction = 1) or reverts (direction = -1) the effect a transaction
+   * has on account and source balances. Mirrors the rules used in create().
+   */
+  private async applyBalanceEffects(
+    tx: Prisma.TransactionClient,
+    transaction: {
+      type: string;
+      amount: Prisma.Decimal | number;
+      accountFromId: string | null;
+      accountToId: string | null;
+      transactionSources: {
+        sourceId: string;
+        amount: Prisma.Decimal | number;
+      }[];
+    },
+    direction: 1 | -1,
+  ) {
+    const signed = (value: Prisma.Decimal | number) =>
+      new Prisma.Decimal(value).mul(direction);
+    const amount = signed(transaction.amount);
+
+    if (transaction.type === 'EXPENSE' && transaction.accountFromId) {
+      await tx.account.update({
+        where: { id: transaction.accountFromId },
+        data: { currentBalance: { decrement: amount } },
+      });
+    } else if (transaction.type === 'INCOME' && transaction.accountToId) {
+      await tx.account.update({
+        where: { id: transaction.accountToId },
+        data: { currentBalance: { increment: amount } },
+      });
+    } else if (
+      transaction.type === 'TRANSFER' &&
+      transaction.accountFromId &&
+      transaction.accountToId
+    ) {
+      await tx.account.update({
+        where: { id: transaction.accountFromId },
+        data: { currentBalance: { decrement: amount } },
+      });
+      await tx.account.update({
+        where: { id: transaction.accountToId },
+        data: { currentBalance: { increment: amount } },
+      });
+    }
+
+    for (const sourceItem of transaction.transactionSources ?? []) {
+      if (transaction.type === 'EXPENSE') {
+        await tx.source.update({
+          where: { id: sourceItem.sourceId },
+          data: { currentBalance: { decrement: signed(sourceItem.amount) } },
+        });
+      } else if (transaction.type === 'INCOME') {
+        await tx.source.update({
+          where: { id: sourceItem.sourceId },
+          data: { currentBalance: { increment: signed(sourceItem.amount) } },
         });
       }
     }
-
-    return this.prisma.transaction.update({
-      where: { id },
-      data,
-      include: {
-        accountFrom: true,
-        accountTo: true,
-        category: true,
-        partner: true,
-        transactionSources: { include: { source: true } },
-      },
-    });
   }
 
   async remove(id: string) {

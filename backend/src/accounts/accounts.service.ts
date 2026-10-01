@@ -1,4 +1,5 @@
 ﻿import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -31,10 +32,23 @@ export class AccountsService {
   }
 
   async update(id: string, updateAccountDto: UpdateAccountDto) {
-    await this.findOne(id);
+    const account = await this.findOne(id);
+    // currentBalance is derived from movements: never overwrite it from the client.
+    // Changing the initial balance shifts the current balance by the same difference.
+    const data = { ...updateAccountDto };
+    delete data.currentBalance;
     return this.prisma.account.update({
       where: { id },
-      data: { ...updateAccountDto },
+      data: {
+        ...data,
+        ...(data.initialBalance !== undefined && {
+          currentBalance: {
+            increment: new Prisma.Decimal(data.initialBalance).minus(
+              account.initialBalance,
+            ),
+          },
+        }),
+      },
     });
   }
 

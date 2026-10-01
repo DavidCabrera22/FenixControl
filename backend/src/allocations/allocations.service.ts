@@ -119,17 +119,42 @@ export class AllocationsService {
   }
 
   async update(id: string, dto: UpdateAllocationDto) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
     const data: Record<string, unknown> = {};
     if (dto.date) data.date = new Date(dto.date);
     if (dto.accountId) data.accountId = dto.accountId;
     if (dto.totalAmount !== undefined) data.totalAmount = dto.totalAmount;
     if (dto.status) data.status = dto.status;
     if (dto.notes !== undefined) data.notes = dto.notes;
-    return this.prisma.allocation.update({
-      where: { id },
-      data,
-      include: { account: true, allocationLines: true },
+
+    return this.prisma.$transaction(async (tx) => {
+      const allocation = await tx.allocation.update({
+        where: { id },
+        data,
+        include: { account: true, allocationLines: true },
+      });
+
+      // 1. Revert the previous amount on the previous account, apply the new one
+      await tx.account.update({
+        where: { id: existing.accountId },
+        data: { currentBalance: { increment: existing.totalAmount } },
+      });
+      await tx.account.update({
+        where: { id: allocation.accountId },
+        data: { currentBalance: { decrement: allocation.totalAmount } },
+      });
+
+      // 2. Keep the linked EXPENSE transaction (shown in Movements) in sync
+      await tx.transaction.updateMany({
+        where: { allocationId: id, type: 'EXPENSE' },
+        data: {
+          amount: allocation.totalAmount,
+          accountFromId: allocation.accountId,
+          date: allocation.date,
+        },
+      });
+
+      return allocation;
     });
   }
 

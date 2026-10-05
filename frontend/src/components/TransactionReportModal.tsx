@@ -22,8 +22,10 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedThirdParty, setSelectedThirdParty] = useState('');
   const [selectedPartner, setSelectedPartner] = useState('');
+  const [selectedAccount, setSelectedAccount] = useState('');
 
   // Data lists
+  const [accounts, setAccounts] = useState<{ id: string; name: string }[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [thirdParties, setThirdParties] = useState<{ id: string; name: string }[]>([]);
   const [partners, setPartners] = useState<{ id: string; name: string }[]>([]);
@@ -54,8 +56,10 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
         axios.get('/third-parties'),
         axios.get('/partners'),
         axios.get('/transactions'),
-      ]).then(([catRes, tpRes, pRes, txRes]) => {
+        axios.get('/accounts'),
+      ]).then(([catRes, tpRes, pRes, txRes, accRes]) => {
         if (cancelled) return;
+        setAccounts(accRes.data);
         setCategories(catRes.data);
         setThirdParties(tpRes.data);
         setPartners(pRes.data);
@@ -75,6 +79,7 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
       setSelectedCategory('');
       setSelectedThirdParty('');
       setSelectedPartner('');
+      setSelectedAccount('');
       setReportType('detailed');
       setFilteredData([]);
       setReportUrl('');
@@ -89,6 +94,9 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
 
     if (dateFrom) result = result.filter(t => t.date.slice(0, 10) >= dateFrom);
     if (dateTo) result = result.filter(t => t.date.slice(0, 10) <= dateTo);
+    if (selectedAccount) {
+      result = result.filter(t => t.accountFrom?.id === selectedAccount || t.accountTo?.id === selectedAccount);
+    }
     if (selectedCategory) {
       result = result.filter(t => t.category?.id === selectedCategory);
     }
@@ -139,6 +147,7 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
     const to = dateTo ? new Date(dateTo + 'T00:00:00Z').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'Sin fecha final';
     activeFilters.push(`${from} — ${to}`);
   }
+  if (selectedAccount) activeFilters.push(`Cuenta: ${accounts.find(a => a.id === selectedAccount)?.name}`);
   if (selectedCategory) activeFilters.push(`Categoría: ${categories.find(c => c.id === selectedCategory)?.name}`);
   if (selectedThirdParty) activeFilters.push(`Tercero: ${thirdParties.find(t => t.id === selectedThirdParty)?.name}`);
   if (selectedPartner) activeFilters.push(`Sociedad: ${partners.find(p => p.id === selectedPartner)?.name}`);
@@ -227,7 +236,18 @@ export const TransactionReportModal = ({ isOpen, onClose }: TransactionReportMod
                     <span className="material-symbols-outlined text-lg text-primary">filter_alt</span>
                     Filtros Opcionales
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Cuenta */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-500">Cuenta</label>
+                      <SearchableSelect
+                        options={[{ value: '', label: 'Todas las cuentas' }, ...accounts.map(a => ({ value: a.id, label: a.name }))]}
+                        value={selectedAccount}
+                        onChange={setSelectedAccount}
+                        placeholder="Todas las cuentas..."
+                      />
+                    </div>
+
                     {/* Categoría */}
                     <div className="space-y-1.5">
                       <label className="block text-xs font-bold text-slate-500">Categoría</label>
